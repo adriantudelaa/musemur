@@ -9,11 +9,11 @@ const app = express()
 
 app.use(express.json())
 
-app.use(usuariosRoutes)
-app.use(museosRoutes)
-app.use(reservasRoutes)
-app.use(administradoresRoutes)
-app.use(chatboxRoutes)
+app.use("/api",usuariosRoutes)
+app.use("/api",museosRoutes)
+app.use("/api",reservasRoutes)
+app.use("/api",administradoresRoutes)
+app.use("/api",chatboxRoutes)
 
 app.use((req, res) => {
     res.status(404).json({ message: "Ruta no encontrada" })

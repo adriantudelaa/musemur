@@ -7,7 +7,7 @@ router.get("/reservas", getReservas);
 
 router.post("/reservas/user", getReservasByUser);
 
-router.get("/reservas/admin", getReservasByAdmin);
+router.post("/reservas/admin", getReservasByAdmin);
 
 router.post("/reservas", postReservas);
 
