@@ -5,9 +5,9 @@ const router = Router();
 
 router.get("/museosCity", getMuseosCity);
 
-router.get("/museosName", getMuseo);
+router.get("/museosName", getMuseos);
 
-router.get("/museos", getMuseos);
+router.get("/museos", getMuseo);
 
 router.put("/museos", putMuseos);
 
