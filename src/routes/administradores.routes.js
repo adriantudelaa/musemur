@@ -7,6 +7,6 @@ router.get("/admin", getAdmin);
 
 router.put("/admin", updateAdmin);
 
-router.get("/admin/museum", getAdminByMuseum);
+router.post("/admin/museum", getAdminByMuseum);
 
 export default router;

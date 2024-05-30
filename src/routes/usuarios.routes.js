@@ -13,8 +13,8 @@ router.put("/UserPswrd", updateUserPswrd);
 
 router.delete("/User", deleteUser);
 
-router.get('/Userlogin', loginUser);
+router.post('/Userlogin', loginUser);
 
-router.get('/AdminLogin', loginAdmin);
+router.post('/AdminLogin', loginAdmin);
 
 export default router;

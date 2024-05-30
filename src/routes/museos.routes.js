@@ -1,16 +1,14 @@
 import { Router } from "express";
-import { getMuseosCity, getMuseos, getMuseo, putMuseos,getMuseosImg } from "../controllers/museos.controllers.js";
+import { getMuseosCity, getMuseos, getMuseo, putMuseos } from "../controllers/museos.controllers.js";
 
 const router = Router();
 
-router.get("/museosCity", getMuseosCity);
+router.post("/museosCity", getMuseosCity);
 
-router.get("/museosName", getMuseos);
+router.post("/museosName", getMuseo);
 
-router.get("/museo", getMuseo);
+router.post("/museos", getMuseos);
 
 router.put("/museos", putMuseos);
-
-router.get("/museosImg", getMuseosImg);
 
 export default router;

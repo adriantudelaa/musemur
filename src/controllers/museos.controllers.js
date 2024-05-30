@@ -35,25 +35,6 @@ export const getMuseosCity = async (req, res) => {
     }
 };
 
-export const getMuseosImg = async (req, res) => {
-    const { museum_name } = req.body;
-    if (!museum_name) {
-        return res.status(400).json({ message: 'Nombre del museo no proporcionado' });
-    }
-
-    try {
-        const [result] = await queryDatabase("SELECT museum_img from museos WHERE museum_name = ?", [museum_name]);
-        if (result.length === 0) {
-            return res.status(404).json({ message: 'Museo no encontrado' });
-        }
-        res.status(200).json(result[0]);
-    } catch (error) {
-        if (error.message === 'Database connection was refused' || error.message === 'Database connection was lost') {
-            return res.status(503).json({ message: 'Servicio no disponible. Inténtelo de nuevo más tarde.' });
-        }
-        res.status(500).json({ message: 'Error al obtener la imagen del museo', error: error.message });
-    }
-};
 
 export const getMuseos = async (req, res) => {
     try {
