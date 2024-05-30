@@ -4,7 +4,6 @@ import museosRoutes from "./routes/museos.routes.js"
 import reservasRoutes from "./routes/reservas.routes.js"
 import administradoresRoutes from "./routes/administradores.routes.js"
 import chatboxRoutes from "./routes/chatbox.routes.js"
-import {PORT} from './config.js'
 
 const app = express()
 
