@@ -7,7 +7,7 @@ router.get("/museosCity", getMuseosCity);
 
 router.get("/museosName", getMuseos);
 
-router.get("/museos", getMuseo);
+router.get("/museo", getMuseo);
 
 router.put("/museos", putMuseos);
 
