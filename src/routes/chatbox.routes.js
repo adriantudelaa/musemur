@@ -11,8 +11,8 @@ router.put("/chatbox", putChatbox);
 
 router.delete("/chatbox", deleteChatbox);
 
-router.get("/chatbox/question", getChatboxByQues);
+router.post("/chatbox/question", getChatboxByQues);
 
-router.get("/chatbox/museum", getChatboxByMuseum);
+router.post("/chatbox/museum", getChatboxByMuseum);
 
 export default router;
