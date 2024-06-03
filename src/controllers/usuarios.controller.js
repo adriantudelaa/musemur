@@ -17,9 +17,27 @@ export const createUser = async (req, res) => {
         return res.status(400).json({ message: 'Todos los campos son requeridos' });
     }
 
+    // Validar la contraseña
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+    if (!passwordRegex.test(user_pswrd)) {
+        return res.status(400).json({ message: 'La contraseña debe tener al menos 8 caracteres, una letra mayúscula, una letra minúscula y un número.' });
+    }
+
     try {
-        const [rows] = await pool.query("INSERT INTO usuarios VALUES (0, ?, ?, ?, ?, ?, ?, ?, 0)",
-            [user_first_name, user_surname, username, user_phone, user_email, user_dni, user_pswrd]);
+        // Verificar si el nombre de usuario ya existe
+        const [existingUsername] = await pool.query("SELECT * FROM usuarios WHERE username = ?", [username]);
+        if (existingUsername.length > 0) {
+            return res.status(409).json({ message: 'El nombre de usuario ya está en uso.' });
+        }
+
+        // Verificar si el DNI ya existe
+        const [existingDni] = await pool.query("SELECT * FROM usuarios WHERE user_dni = ?", [user_dni]);
+        if (existingDni.length > 0) {
+            return res.status(409).json({ message: 'El DNI ya está en uso.' });
+        }
+
+        const [rows] = await pool.query("INSERT INTO usuarios (user_first_name, user_surname, username, user_phone, user_email, user_dni, user_pswrd, user_rol) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            [user_first_name, user_surname, username, user_phone, user_email, user_dni, user_pswrd, user_rol]);
         res.status(201).json({
             user_first_name,
             user_surname,
@@ -27,7 +45,8 @@ export const createUser = async (req, res) => {
             user_phone,
             user_email,
             user_dni,
-            user_pswrd
+            user_pswrd,
+            user_rol
         });
     } catch (error) {
         console.error('Error al crear usuario:', error);
