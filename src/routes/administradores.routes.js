@@ -9,4 +9,6 @@ router.put("/admin", updateAdmin);
 
 router.post("/admin/museum", getAdminByMuseum);
 
+router.post("/createAdmin", createAdmin);
+
 export default router;

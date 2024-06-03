@@ -15,6 +15,45 @@ const queryDatabase = async (query, params) => {
     }
 };
 
+export const createAdmin = async (req, res) => {
+    const { user_first_name, user_surname, username, user_phone, user_email, user_dni, user_pswrd, id_museo } = req.body;
+
+    if (!user_first_name || !user_surname || !username || !user_phone || !user_email || !user_dni || !user_pswrd || !id_museo) {
+        return res.status(400).json({ message: 'Todos los campos son requeridos' });
+    }
+
+    try {
+        // Create new user with role admin
+        const [result] = await queryDatabase(
+            "INSERT INTO usuarios (user_first_name, user_surname, username, user_phone, user_email, user_dni, user_pswrd, user_rol) VALUES (?, ?, ?, ?, ?, ?, ?, 1)",
+            [user_first_name, user_surname, username, user_phone, user_email, user_dni, user_pswrd]
+        );
+
+        const id_user = result.insertId;
+
+        // Link admin to museum
+        await queryDatabase(
+            "INSERT INTO admin (id_admin, id_museo) VALUES (?, ?)",
+            [id_user, id_museo]
+        );
+
+        res.status(201).json({ message: 'Administrador registrado exitosamente', id_user, id_museo });
+    } catch (error) {
+        console.error('Error al crear administrador:', error);
+        if (error.message.includes('Duplicate entry')) {
+            if (error.message.includes('username')) {
+                res.status(409).json({ message: 'El nombre de usuario ya existe' });
+            } else if (error.message.includes('user_dni')) {
+                res.status(409).json({ message: 'El DNI ya existe' });
+            } else {
+                res.status(500).json({ message: 'Error al crear administrador' });
+            }
+        } else {
+            res.status(500).json({ message: 'Error al crear administrador' });
+        }
+    }
+};
+
 export const getAdmin = async (req, res) => {
     try {
         const [result] = await queryDatabase("SELECT * from admin;");
