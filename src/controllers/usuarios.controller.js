@@ -180,6 +180,14 @@ export const loginAdmin = async (req, res) => {
     }
 };
 
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'musemur.info@gmail.com', // Cambia esto por tu correo
+        pass: 'Musemur0606*', // Cambia esto por tu contraseña
+    },
+});
+
 export const resetPassword = async (req, res) => {
     const { user_email } = req.body;
 
@@ -197,17 +205,6 @@ export const resetPassword = async (req, res) => {
         const user = rows[0];
         const resetToken = Math.random().toString(36).substr(2); // Generar un token simple
 
-        // Aquí se podría guardar el token en la base de datos, asociado al usuario, y establecer un tiempo de expiración
-
-        // Configurar el transporte del correo
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: 'tuemail@gmail.com', // Cambia esto por tu correo
-                pass: 'tucontraseña', // Cambia esto por tu contraseña
-            },
-        });
-
         // Configurar el correo
         const mailOptions = {
             from: 'tuemail@gmail.com',
@@ -219,6 +216,7 @@ export const resetPassword = async (req, res) => {
         // Enviar el correo
         transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
+                console.error('Error al enviar el correo:', error);
                 return res.status(500).json({ message: 'Error al enviar el correo de recuperación' });
             } else {
                 return res.status(200).json({ message: 'Correo de recuperación enviado' });
@@ -229,4 +227,3 @@ export const resetPassword = async (req, res) => {
         res.status(500).json({ message: 'Error interno del servidor' });
     }
 };
-
