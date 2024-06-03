@@ -15,6 +15,21 @@ const queryDatabase = async (query, params) => {
     }
 };
 
+export const getMuseos = async (req, res) => {
+    try {
+        const [result] = await queryDatabase("SELECT * from museos");
+        if (result.length === 0) {
+            return res.status(404).json({ message: 'No se encontraron museos' });
+        }
+        res.status(200).json(result);
+    } catch (error) {
+        if (error.message === 'Database connection was refused' || error.message === 'Database connection was lost') {
+            return res.status(503).json({ message: 'Servicio no disponible. Inténtelo de nuevo más tarde.' });
+        }
+        res.status(500).json({ message: 'Error al obtener museos', error: error.message });
+    }
+};
+
 export const getMuseosCity = async (req, res) => {
     const { museum_city } = req.body;
     if (!museum_city) {
@@ -32,22 +47,6 @@ export const getMuseosCity = async (req, res) => {
             return res.status(503).json({ message: 'Servicio no disponible. Inténtelo de nuevo más tarde.' });
         }
         res.status(500).json({ message: 'Error al obtener museos por ciudad', error: error.message });
-    }
-};
-
-
-export const getMuseos = async (req, res) => {
-    try {
-        const [result] = await queryDatabase("SELECT * from museos");
-        if (result.length === 0) {
-            return res.status(404).json({ message: 'No se encontraron museos' });
-        }
-        res.status(200).json(result);
-    } catch (error) {
-        if (error.message === 'Database connection was refused' || error.message === 'Database connection was lost') {
-            return res.status(503).json({ message: 'Servicio no disponible. Inténtelo de nuevo más tarde.' });
-        }
-        res.status(500).json({ message: 'Error al obtener museos', error: error.message });
     }
 };
 
