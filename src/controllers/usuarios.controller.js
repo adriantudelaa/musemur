@@ -1,4 +1,5 @@
 import { pool } from "../db.js";
+import nodemailer from "nodemailer"; // Asegúrate de tener nodemailer instalado
 
 export const seeUsers = async (req, res) => {
     try {
@@ -175,6 +176,56 @@ export const loginAdmin = async (req, res) => {
 
     } catch (error) {
         console.error('Error al iniciar sesión:', error);
+        res.status(500).json({ message: 'Error interno del servidor' });
+    }
+};
+
+export const resetPassword = async (req, res) => {
+    const { user_email } = req.body;
+
+    if (!user_email) {
+        return res.status(400).json({ message: 'Se requiere correo electrónico' });
+    }
+
+    try {
+        const [rows] = await pool.query('SELECT * FROM usuarios WHERE user_email = ?', [user_email]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        const user = rows[0];
+        const resetToken = Math.random().toString(36).substr(2); // Generar un token simple
+
+        // Aquí se podría guardar el token en la base de datos, asociado al usuario, y establecer un tiempo de expiración
+
+        // Configurar el transporte del correo
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'tuemail@gmail.com', // Cambia esto por tu correo
+                pass: 'tucontraseña', // Cambia esto por tu contraseña
+            },
+        });
+
+        // Configurar el correo
+        const mailOptions = {
+            from: 'tuemail@gmail.com',
+            to: user_email,
+            subject: 'Recuperación de contraseña',
+            text: `Hola ${user.username},\n\nPara restablecer tu contraseña, por favor usa el siguiente token: ${resetToken}\n\nGracias.`,
+        };
+
+        // Enviar el correo
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                return res.status(500).json({ message: 'Error al enviar el correo de recuperación' });
+            } else {
+                return res.status(200).json({ message: 'Correo de recuperación enviado' });
+            }
+        });
+    } catch (error) {
+        console.error('Error al recuperar contraseña:', error);
         res.status(500).json({ message: 'Error interno del servidor' });
     }
 };
