@@ -1,5 +1,4 @@
 import { pool } from "../db.js";
-import nodemailer from "nodemailer"; // Asegúrate de tener nodemailer instalado
 
 export const seeUsers = async (req, res) => {
     try {
@@ -180,51 +179,27 @@ export const loginAdmin = async (req, res) => {
     }
 };
 
-const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true, // true para 465, false para otros puertos
-    auth: {
-        user: 'musemur.info@gmail.com', // tu correo
-        pass: 'Musemur0606*', // tu contraseña o contraseña de aplicaciones
-    },
-    tls: {
-        rejectUnauthorized: false
-    }
-});
-
 export const resetPassword = async (req, res) => {
-    const { user_email } = req.body;
+    const { user_email, user_dni, new_password } = req.body;
 
-    if (!user_email) {
-        return res.status(400).json({ message: 'Se requiere correo electrónico' });
+    if (!user_email || !user_dni || !new_password) {
+        return res.status(400).json({ message: 'Todos los campos son requeridos' });
     }
 
     try {
-        const [rows] = await pool.query('SELECT * FROM usuarios WHERE user_email = ?', [user_email]);
+        const [rows] = await pool.query('SELECT * FROM usuarios WHERE user_email = ? AND user_dni = ?', [user_email, user_dni]);
 
         if (rows.length === 0) {
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
 
-        const user = rows[0];
-        const resetToken = Math.random().toString(36).substr(2); // Generar un token simple
+        const [result] = await pool.query('UPDATE usuarios SET user_pswrd = ? WHERE user_email = ? AND user_dni = ?', [new_password, user_email, user_dni]);
 
-        const mailOptions = {
-            from: 'musemur.info@gmail.com', // tu correo
-            to: user_email,
-            subject: 'Recuperación de contraseña',
-            text: `Hola ${user.username},\n\nPara restablecer tu contraseña, por favor usa el siguiente token: ${resetToken}\n\nGracias.`,
-        };
+        if (result.affectedRows === 0) {
+            return res.status(500).json({ message: 'Error al actualizar la contraseña' });
+        }
 
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                console.error('Error al enviar el correo:', error);
-                return res.status(500).json({ message: 'Error al enviar el correo de recuperación' });
-            } else {
-                return res.status(200).json({ message: 'Correo de recuperación enviado' });
-            }
-        });
+        res.status(200).json({ message: 'Contraseña actualizada correctamente' });
     } catch (error) {
         console.error('Error al recuperar contraseña:', error);
         res.status(500).json({ message: 'Error interno del servidor' });
