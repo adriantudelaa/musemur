@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getAdmin, getAdminByMuseum, updateAdmin } from "../controllers/administradores.controllers.js";
+import { getAdmin, getAdminByMuseum, updateAdmin, createAdmin } from "../controllers/administradores.controllers.js";
 
 const router = Router();
 
