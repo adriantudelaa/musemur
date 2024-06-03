@@ -181,11 +181,16 @@ export const loginAdmin = async (req, res) => {
 };
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true, // true para 465, false para otros puertos
     auth: {
-        user: 'musemur.info@gmail.com', // Cambia esto por tu correo
-        pass: 'Musemur0606*', // Cambia esto por tu contraseña
+        user: 'musemur.info@gmail.com', // tu correo
+        pass: 'Musemur0606*', // tu contraseña o contraseña de aplicaciones
     },
+    tls: {
+        rejectUnauthorized: false
+    }
 });
 
 export const resetPassword = async (req, res) => {
@@ -205,15 +210,13 @@ export const resetPassword = async (req, res) => {
         const user = rows[0];
         const resetToken = Math.random().toString(36).substr(2); // Generar un token simple
 
-        // Configurar el correo
         const mailOptions = {
-            from: 'tuemail@gmail.com',
+            from: 'musemur.info@gmail.com', // tu correo
             to: user_email,
             subject: 'Recuperación de contraseña',
             text: `Hola ${user.username},\n\nPara restablecer tu contraseña, por favor usa el siguiente token: ${resetToken}\n\nGracias.`,
         };
 
-        // Enviar el correo
         transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
                 console.error('Error al enviar el correo:', error);
