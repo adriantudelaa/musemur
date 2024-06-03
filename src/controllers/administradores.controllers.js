@@ -32,7 +32,7 @@ export const createAdmin = async (req, res) => {
         const id_user = result.insertId;
 
         // Link admin to museum
-        await queryDatabase(
+        const [adminResult] = await queryDatabase(
             "INSERT INTO admin (id_admin, id_museo) VALUES (?, ?)",
             [id_user, id_museo]
         );
