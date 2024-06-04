@@ -224,3 +224,23 @@ export const resetPassword = async (req, res) => {
         res.status(500).json({ message: 'Error interno del servidor' });
     }
 };
+export const verifyAdminDni = async (req, res) => {
+    const { user_dni } = req.body;
+
+    if (!user_dni) {
+        return res.status(400).json({ message: 'Se requiere DNI' });
+    }
+
+    try {
+        const [rows] = await pool.query('SELECT * FROM usuarios WHERE user_dni = ? AND user_rol = 1', [user_dni]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'DNI no corresponde a un administrador' });
+        }
+
+        res.status(200).json({ message: 'DNI válido' });
+    } catch (error) {
+        console.error('Error al verificar DNI de administrador:', error);
+        res.status(500).json({ message: 'Error interno del servidor' });
+    }
+};

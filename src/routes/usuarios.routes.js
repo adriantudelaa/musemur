@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {seeUsers, createUser,updateUserData,updateUserPswrd,deleteUser,loginUser, loginAdmin, resetPassword} from "../controllers/usuarios.controller.js";
+import {seeUsers, createUser,updateUserData,updateUserPswrd,deleteUser,loginUser, loginAdmin, resetPassword, verifyAdminDni} from "../controllers/usuarios.controller.js";
 
 const router = Router();
 
@@ -18,5 +18,8 @@ router.post('/Userlogin', loginUser);
 router.post('/AdminLogin', loginAdmin);
 
 router.post('/ResetPassword', resetPassword);
+
+router.post('/VerifyAdminDni', verifyAdminDni);
+
 
 export default router;
