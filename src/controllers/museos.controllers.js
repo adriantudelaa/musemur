@@ -91,26 +91,6 @@ export const putMuseos = async (req, res) => {
     }
 };
 
-export const addMuseo = async (req, res) => {
-    const { museum_name, museum_city, museum_loc, museum_desc, museum_hour } = req.body;
-    if (!museum_name || !museum_city || !museum_loc || !museum_desc || !museum_hour) {
-        return res.status(400).json({ message: 'Datos incompletos' });
-    }
-
-    try {
-        const [result] = await queryDatabase(
-            "INSERT INTO museos (museum_name, museum_city, museum_loc, museum_desc, museum_hour) VALUES (?, ?, ?, ?, ?)",
-            [museum_name, museum_city, museum_loc, museum_desc, museum_hour]
-        );
-        res.status(201).json({ message: 'Museo añadido correctamente', id_museo: result.insertId });
-    } catch (error) {
-        if (error.message === 'Database connection was refused' || error.message === 'Database connection was lost') {
-            return res.status(503).json({ message: 'Servicio no disponible. Inténtelo de nuevo más tarde.' });
-        }
-        res.status(500).json({ message: 'Error al añadir el museo', error: error.message });
-    }
-};
-
 export const deleteMuseo = async (req, res) => {
     const { museum_name } = req.body;
 
@@ -122,21 +102,24 @@ export const deleteMuseo = async (req, res) => {
         // Desactivar modo seguro
         await queryDatabase('SET SQL_SAFE_UPDATES = 0');
         
-        // Verificar si el museo existe
-        const [museos] = await queryDatabase('SELECT * FROM museos WHERE museum_name = ?', [museum_name]);
-
-        if (museos.length === 0) {
-            await queryDatabase('SET SQL_SAFE_UPDATES = 1');
-            return res.status(404).json({ message: 'Museo no encontrado' });
-        }
-
-        const museoId = museos[0].id_museo;
-
         // Eliminar las referencias en la tabla admin
-        await queryDatabase('DELETE FROM admin WHERE id_museo = ?', [museoId]);
+        await queryDatabase(`
+            DELETE admin FROM admin
+            JOIN museos ON admin.id_museo = museos.id_museo
+            WHERE museos.museum_name = ?
+        `, [museum_name]);
+
+        // Eliminar las referencias en la tabla chatbox
+        await queryDatabase(`
+            DELETE chatbox FROM chatbox
+            JOIN museos ON chatbox.id_museo = museos.id_museo
+            WHERE museos.museum_name = ?
+        `, [museum_name]);
 
         // Eliminar el museo
-        const [rows] = await queryDatabase("DELETE FROM museos WHERE museum_name = ?", [museum_name]);
+        const [rows] = await queryDatabase(`
+            DELETE FROM museos WHERE museum_name = ?
+        `, [museum_name]);
 
         // Activar modo seguro
         await queryDatabase('SET SQL_SAFE_UPDATES = 1');
