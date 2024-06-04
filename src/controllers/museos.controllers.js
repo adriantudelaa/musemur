@@ -120,11 +120,13 @@ export const deleteMuseo = async (req, res) => {
 
     try {
         // Desactivar modo seguro
+        await queryDatabase('SET SQL_SAFE_UPDATES = 0');
         
         // Verificar si el museo existe
         const [museos] = await queryDatabase('SELECT * FROM museos WHERE museum_name = ?', [museum_name]);
 
         if (museos.length === 0) {
+            await queryDatabase('SET SQL_SAFE_UPDATES = 1');
             return res.status(404).json({ message: 'Museo no encontrado' });
         }
 
@@ -137,6 +139,8 @@ export const deleteMuseo = async (req, res) => {
         const [rows] = await queryDatabase("DELETE FROM museos WHERE museum_name = ?", [museum_name]);
 
         // Activar modo seguro
+        await queryDatabase('SET SQL_SAFE_UPDATES = 1');
+
         if (rows.affectedRows === 0) {
             return res.status(404).json({ message: 'Museo no encontrado' });
         }
@@ -145,6 +149,8 @@ export const deleteMuseo = async (req, res) => {
             message: 'Museo con nombre ' + museum_name + ' eliminado'
         });
     } catch (error) {
+        console.error('Error al eliminar museo:', error);
+        await queryDatabase('SET SQL_SAFE_UPDATES = 1');
         res.status(500).json({ message: 'Error al eliminar museo' });
     }
 };
