@@ -119,6 +119,8 @@ export const deleteMuseo = async (req, res) => {
     }
 
     try {
+        // Desactivar modo seguro
+        
         // Verificar si el museo existe
         const [museos] = await queryDatabase('SELECT * FROM museos WHERE museum_name = ?', [museum_name]);
 
@@ -126,9 +128,15 @@ export const deleteMuseo = async (req, res) => {
             return res.status(404).json({ message: 'Museo no encontrado' });
         }
 
+        const museoId = museos[0].id_museo;
+
+        // Eliminar las referencias en la tabla admin
+        await queryDatabase('DELETE FROM admin WHERE id_museo = ?', [museoId]);
+
         // Eliminar el museo
         const [rows] = await queryDatabase("DELETE FROM museos WHERE museum_name = ?", [museum_name]);
 
+        // Activar modo seguro
         if (rows.affectedRows === 0) {
             return res.status(404).json({ message: 'Museo no encontrado' });
         }
@@ -137,7 +145,6 @@ export const deleteMuseo = async (req, res) => {
             message: 'Museo con nombre ' + museum_name + ' eliminado'
         });
     } catch (error) {
-        console.error('Error al eliminar museo:', error);
         res.status(500).json({ message: 'Error al eliminar museo' });
     }
 };
