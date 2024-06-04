@@ -112,21 +112,32 @@ export const addMuseo = async (req, res) => {
 };
 
 export const deleteMuseo = async (req, res) => {
-    const { id_museo } = req.params;
+    const { id_museo } = req.body;
+
     if (!id_museo) {
-        return res.status(400).json({ message: 'ID del museo no proporcionado' });
+        return res.status(400).json({ message: 'Se requiere ID del museo' });
     }
 
     try {
-        const [result] = await queryDatabase("DELETE FROM museos WHERE id_museo = ?", [id_museo]);
-        if (result.affectedRows === 0) {
+        // Verificar si el museo existe
+        const [museos] = await queryDatabase('SELECT * FROM museos WHERE id_museo = ?', [id_museo]);
+
+        if (museos.length === 0) {
             return res.status(404).json({ message: 'Museo no encontrado' });
         }
-        res.status(200).json({ message: 'Museo eliminado correctamente' });
-    } catch (error) {
-        if (error.message === 'Database connection was refused' || error.message === 'Database connection was lost') {
-            return res.status(503).json({ message: 'Servicio no disponible. Inténtelo de nuevo más tarde.' });
+
+        // Eliminar el museo
+        const [rows] = await queryDatabase("DELETE FROM museos WHERE id_museo = ?", [id_museo]);
+
+        if (rows.affectedRows === 0) {
+            return res.status(404).json({ message: 'Museo no encontrado' });
         }
-        res.status(500).json({ message: 'Error al eliminar el museo', error: error.message });
+
+        res.status(200).json({
+            message: 'Museo con ID ' + id_museo + ' eliminado'
+        });
+    } catch (error) {
+        console.error('Error al eliminar museo:', error);
+        res.status(500).json({ message: 'Error al eliminar museo' });
     }
 };
