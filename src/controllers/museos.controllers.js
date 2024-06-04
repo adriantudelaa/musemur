@@ -1,18 +1,6 @@
 import { pool } from "../db.js";
 
 // Helper function to handle database queries
-import upload from './upload.js'; // Importa el middleware de multer
-
-const router = express.Router();
-
-// Endpoint para subir imágenes
-router.post('/upload', upload.single('image'), (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ message: 'No se subió ningún archivo' });
-    }
-    res.status(200).json({ imageUrl: `/uploads/${req.file.filename}` });
-});
-
 const queryDatabase = async (query, params) => {
     try {
         return await pool.query(query, params);
@@ -82,19 +70,15 @@ export const getMuseo = async (req, res) => {
     }
 };
 
-router.put('/museos', upload.single('museum_img'), async (req, res) => {
-    const { id_museo, museum_name, museum_city, museum_loc, museum_desc, museum_hour } = req.body;
-    const museum_img = req.file ? `/uploads/${req.file.filename}` : null;
-
-    if (!id_museo || !museum_name || !museum_city || !museum_loc || !museum_hour) {
+export const putMuseos = async (req, res) => {
+    const { id_museo, museum_name, museum_city, museum_loc, museum_desc, museum_hour, museum_img } = req.body;
+    if (!id_museo || !museum_name || !museum_city || !museum_loc || !museum_hour || !museum_img) {
         return res.status(400).json({ message: 'Datos incompletos' });
     }
 
     try {
-        const query = `UPDATE museos SET museum_name = ?, museum_city = ?, museum_loc = ?, museum_desc = ?, museum_hour = ?, museum_img = ? WHERE id_museo = ?`;
-        const params = [museum_name, museum_city, museum_loc, museum_desc, museum_hour, museum_img, id_museo];
-        const [result] = await queryDatabase(query, params);
-
+        const [result] = await queryDatabase("UPDATE museos SET museum_name = ?, museum_city = ?, museum_loc = ?, museum_desc = ?, museum_hour = ?, museum_img = ? WHERE id_museo = ?",
+            [museum_name, museum_city, museum_loc, museum_desc, museum_hour, museum_img, id_museo]);
         if (result.affectedRows === 0) {
             return res.status(404).json({ message: 'Museo no encontrado' });
         }
@@ -105,6 +89,4 @@ router.put('/museos', upload.single('museum_img'), async (req, res) => {
         }
         res.status(500).json({ message: 'Error al actualizar el museo', error: error.message });
     }
-});
-
-export default router;
+};
