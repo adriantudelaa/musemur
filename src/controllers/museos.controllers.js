@@ -112,29 +112,29 @@ export const addMuseo = async (req, res) => {
 };
 
 export const deleteMuseo = async (req, res) => {
-    const { id_museo } = req.body;
+    const { museum_name } = req.body;
 
-    if (!id_museo) {
-        return res.status(400).json({ message: 'Se requiere ID del museo' });
+    if (!museum_name) {
+        return res.status(400).json({ message: 'Se requiere nombre del museo' });
     }
 
     try {
         // Verificar si el museo existe
-        const [museos] = await queryDatabase('SELECT * FROM museos WHERE id_museo = ?', [id_museo]);
+        const [museos] = await queryDatabase('SELECT * FROM museos WHERE museum_name = ?', [museum_name]);
 
         if (museos.length === 0) {
             return res.status(404).json({ message: 'Museo no encontrado' });
         }
 
         // Eliminar el museo
-        const [rows] = await queryDatabase("DELETE FROM museos WHERE id_museo = ?", [id_museo]);
+        const [rows] = await queryDatabase("DELETE FROM museos WHERE museum_name = ?", [museum_name]);
 
         if (rows.affectedRows === 0) {
             return res.status(404).json({ message: 'Museo no encontrado' });
         }
 
         res.status(200).json({
-            message: 'Museo con ID ' + id_museo + ' eliminado'
+            message: 'Museo con nombre ' + museum_name + ' eliminado'
         });
     } catch (error) {
         console.error('Error al eliminar museo:', error);
