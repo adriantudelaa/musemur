@@ -110,9 +110,6 @@ export const deleteUser = async (req, res) => {
     }
 
     try {
-        const [rows] = await pool.query("DELETE FROM usuarios WHERE username = ? AND user_rol = 0",
-            [username]);
-
         const [users] = await pool.query('SELECT * FROM usuarios WHERE username = ?', [username]);
 
         if (users.length === 0) {
@@ -124,6 +121,9 @@ export const deleteUser = async (req, res) => {
         if (user.user_rol === 1) {
             return res.status(401).json({ message: 'No puedes eliminar un usuario administrador' });
         }
+
+        const [rows] = await pool.query("DELETE FROM usuarios WHERE username = ? AND user_rol = 0",
+            [username]);
 
         if (rows.affectedRows === 0) {
             return res.status(404).json({ message: 'Usuario no encontrado' });
