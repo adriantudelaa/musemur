@@ -71,15 +71,15 @@ export const getMuseo = async (req, res) => {
 };
 
 export const putMuseos = async (req, res) => {
-    const { id_museo, museum_name, museum_city, museum_loc, museum_desc, museum_hour } = req.body;
-    if (!id_museo || !museum_name || !museum_city || !museum_loc || !museum_hour) {
+    const { id_museo, museum_name, museum_city, museum_loc, museum_desc, museum_open, museum_close } = req.body;
+    if (!id_museo || !museum_name || !museum_city || !museum_loc || !museum_open || !museum_close) {
         return res.status(400).json({ message: 'Datos incompletos' });
     }
 
     try {
         const [result] = await queryDatabase(
-            "UPDATE museos SET museum_name = ?, museum_city = ?, museum_loc = ?, museum_desc = ?, museum_hour = ? WHERE id_museo = ?",
-            [museum_name, museum_city, museum_loc, museum_desc, museum_hour, id_museo]
+            "UPDATE museos SET museum_name = ?, museum_city = ?, museum_loc = ?, museum_desc = ?, museum_open = ?, museum_close = ? WHERE id_museo = ?",
+            [museum_name, museum_city, museum_loc, museum_desc, museum_open, museum_close, id_museo]
         );
 
         if (result.affectedRows === 0) {
@@ -94,7 +94,6 @@ export const putMuseos = async (req, res) => {
         res.status(500).json({ message: 'Error al actualizar el museo', error: error.message });
     }
 };
-
 
 export const deleteMuseo = async (req, res) => {
     const { museum_name } = req.body;
@@ -145,15 +144,15 @@ export const deleteMuseo = async (req, res) => {
 };
 
 export const addMuseo = async (req, res) => {
-    const { museum_name, museum_city, museum_loc, museum_desc, museum_hour } = req.body;
-    if (!museum_name || !museum_city || !museum_loc || !museum_desc || !museum_hour) {
+    const { museum_name, museum_city, museum_loc, museum_desc, museum_open, museum_close } = req.body;
+    if (!museum_name || !museum_city || !museum_loc || !museum_desc || !museum_open || !museum_close) {
         return res.status(400).json({ message: 'Datos incompletos' });
     }
 
     try {
         const [result] = await queryDatabase(
-            "INSERT INTO museos (museum_name, museum_city, museum_loc, museum_desc, museum_hour) VALUES (?, ?, ?, ?, ?)",
-            [museum_name, museum_city, museum_loc, museum_desc, museum_hour]
+            "INSERT INTO museos (museum_name, museum_city, museum_loc, museum_desc, museum_open, museum_close) VALUES (?, ?, ?, ?, ?, ?)",
+            [museum_name, museum_city, museum_loc, museum_desc, museum_open, museum_close]
         );
 
         const id_museo = result.insertId;
