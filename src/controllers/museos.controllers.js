@@ -169,10 +169,10 @@ export const addMuseo = async (req, res) => {
 
         const id_museo = result.insertId;
 
-        if (exhibitions) {
+        if (exhibitions && exhibitions.length > 0) {
             for (const expo of exhibitions) {
                 await queryDatabase(
-                    "INSERT INTO exposiciones (id_museo, expo_title, expo_desc) VALUES (?, ?, ?, ?)",
+                    "INSERT INTO exposiciones (id_museo, expo_title, expo_desc) VALUES (?, ?, ?)",
                     [id_museo, expo.title, expo.description]
                 );
             }
