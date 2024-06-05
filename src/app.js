@@ -11,7 +11,6 @@ import exposicionesRoutes from './routes/exposiciones.routes.js';
 const app = express();
 
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/api', usuariosRoutes);
 app.use('/api', museosRoutes);
