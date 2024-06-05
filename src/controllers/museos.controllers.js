@@ -138,7 +138,7 @@ export const deleteMuseo = async (req, res) => {
     }
 };
 export const addMuseo = async (req, res) => {
-    const { museum_name, museum_city, museum_loc, museum_desc, museum_hour, museum_img } = req.body;
+    const { museum_name, museum_city, museum_loc, museum_desc, museum_hour } = req.body;
     if (!museum_name || !museum_city || !museum_loc || !museum_desc || !museum_hour) {
         return res.status(400).json({ message: 'Datos incompletos' });
     }
@@ -146,7 +146,7 @@ export const addMuseo = async (req, res) => {
     try {
         const [result] = await queryDatabase(
             "INSERT INTO museos (museum_name, museum_city, museum_loc, museum_desc, museum_hour) VALUES (?, ?, ?, ?, ?)",
-            [museum_name, museum_city, museum_loc, museum_desc, museum_hour, museum_img]
+            [museum_name, museum_city, museum_loc, museum_desc, museum_hour]
         );
         res.status(201).json({ message: 'Museo añadido correctamente', id_museo: result.insertId });
     } catch (error) {
