@@ -158,10 +158,28 @@ export const loginUser = async (req, res) => {
             return res.status(401).json({ message: 'Contraseña incorrecta' });
         }
 
+        await pool.query('UPDATE usuarios SET is_logged_in = 1 WHERE id_user = ?', [user.id_user]);
+
         res.status(200).json({ id: user.id_user, message: 'Iniciado sesión como ' + user.username });
 
     } catch (error) {
         console.error('Error al iniciar sesión:', error);
+        res.status(500).json({ message: 'Error interno del servidor' });
+    }
+};
+
+export const logoutUser = async (req, res) => {
+    const { user_id } = req.body;
+
+    if (!user_id) {
+        return res.status(400).json({ message: 'Se requiere ID de usuario' });
+    }
+
+    try {
+        await pool.query('UPDATE usuarios SET is_logged_in = 0 WHERE id_user = ?', [user_id]);
+        res.status(200).json({ message: 'Sesión cerrada exitosamente' });
+    } catch (error) {
+        console.error('Error al cerrar sesión:', error);
         res.status(500).json({ message: 'Error interno del servidor' });
     }
 };
