@@ -158,7 +158,7 @@ export const loginUser = async (req, res) => {
             return res.status(401).json({ message: 'Contraseña incorrecta' });
         }
 
-        res.status(200).json({ message: 'Iniciado sesión como ' + user.username });
+        res.status(200).json({ id: user.id_user, message: 'Iniciado sesión como ' + user.username });
 
     } catch (error) {
         console.error('Error al iniciar sesión:', error);
