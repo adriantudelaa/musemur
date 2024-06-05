@@ -1,27 +1,12 @@
-import express from 'express';
-import path from 'path';
+import { Router } from "express";
+import { getAllExposiciones, getExposicionesByMuseum, addExposicion, editExposicion, deleteExposicion } from "../controllers/exposiciones.controllers.js";
 
-import usuariosRoutes from './routes/usuarios.routes.js';
-import museosRoutes from './routes/museos.routes.js';
-import reservasRoutes from './routes/reservas.routes.js';
-import administradoresRoutes from './routes/administradores.routes.js';
-import chatboxRoutes from './routes/chatbox.routes.js';
-import exposicionesRoutes from './routes/exposiciones.routes.js';
+const router = Router();
 
-const app = express();
+router.get("/exposiciones", getAllExposiciones);
+router.post("/exposiciones/museum", getExposicionesByMuseum);
+router.post("/exposiciones", addExposicion);
+router.put("/exposiciones", editExposicion);
+router.delete("/exposiciones", deleteExposicion);
 
-app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-app.use('/api', usuariosRoutes);
-app.use('/api', museosRoutes);
-app.use('/api', reservasRoutes);
-app.use('/api', administradoresRoutes);
-app.use('/api', chatboxRoutes);
-app.use('/api', exposicionesRoutes);
-
-app.use((req, res) => {
-    res.status(404).json({ message: 'Ruta no encontrada' });
-});
-
-export default app;
+export default router;
