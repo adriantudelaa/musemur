@@ -77,20 +77,25 @@ export const putMuseos = async (req, res) => {
     }
 
     try {
-        // Primero, obtener el ID del museo por su nombre
-        const [resultId] = await queryDatabase("SELECT id_museo FROM museos WHERE museum_name = ?", [museum_name]);
-        if (resultId.length === 0) {
+        // Obtener el id_museo basado en el museum_name
+        const [museoResult] = await queryDatabase("SELECT id_museo FROM museos WHERE museum_name = ?", [museum_name]);
+        
+        if (museoResult.length === 0) {
             return res.status(404).json({ message: 'Museo no encontrado' });
         }
 
-        const id_museo = resultId[0].id_museo;
+        const id_museo = museoResult[0].id_museo;
 
-        // Luego, actualizar los datos del museo
-        const [resultUpdate] = await queryDatabase("UPDATE museos SET museum_name = ?, museum_city = ?, museum_loc = ?, museum_desc = ?, museum_hour = ? WHERE id_museo = ?",
-            [museum_name, museum_city, museum_loc, museum_desc, museum_hour, id_museo]);
-        if (resultUpdate.affectedRows === 0) {
+        // Actualizar los datos del museo usando el id_museo
+        const [result] = await queryDatabase(
+            "UPDATE museos SET museum_name = ?, museum_city = ?, museum_loc = ?, museum_desc = ?, museum_hour = ? WHERE id_museo = ?",
+            [museum_name, museum_city, museum_loc, museum_desc, museum_hour, id_museo]
+        );
+
+        if (result.affectedRows === 0) {
             return res.status(404).json({ message: 'Museo no encontrado' });
         }
+
         res.status(200).json({ message: `Museo ${museum_name} actualizado correctamente` });
     } catch (error) {
         if (error.message === 'Database connection was refused' || error.message === 'Database connection was lost') {
@@ -146,6 +151,7 @@ export const deleteMuseo = async (req, res) => {
         res.status(500).json({ message: 'Error al eliminar museo' });
     }
 };
+
 export const addMuseo = async (req, res) => {
     const { museum_name, museum_city, museum_loc, museum_desc, museum_hour } = req.body;
     if (!museum_name || !museum_city || !museum_loc || !museum_desc || !museum_hour) {
