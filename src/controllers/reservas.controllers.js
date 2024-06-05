@@ -1,12 +1,59 @@
 import { pool } from "../db.js";
 
+const queryDatabase = async (query, params) => {
+    try {
+        return await pool.query(query, params);
+    } catch (error) {
+        if (error.code === 'ECONNREFUSED') {
+            throw new Error('Database connection was refused');
+        } else if (error.code === 'PROTOCOL_CONNECTION_LOST') {
+            throw new Error('Database connection was lost');
+        } else {
+            throw new Error('Database query failed');
+        }
+    }
+};
+
 export const getReservas = async (req, res) => {
     try {
-        const [result] = await pool.query("SELECT * FROM reservas;");
-        res.json(result);
+        const query = `
+            SELECT 
+                r.id_reserva AS id,
+                m.museum_name AS museo,
+                r.reserva_date AS fecha,
+                r.reserva_hour AS hora,
+                r.reserva_people AS personas,
+                u.user_first_name AS nombre_usuario,
+                u.user_email AS email_usuario,
+                r.cancelada AS cancelada
+            FROM 
+                reservas r
+                JOIN museos m ON r.id_museo = m.id_museo
+                JOIN usuarios u ON r.id_user = u.id_user;
+        `;
+
+        const [result] = await queryDatabase(query);
+
+        const formattedResult = result.map(reserva => ({
+            id: reserva.id,
+            museo: reserva.museo,
+            fecha: reserva.fecha,
+            hora: reserva.hora,
+            detalles: `Reserva para ${reserva.personas} personas a las ${reserva.hora}`,
+            usuario: {
+                nombre: reserva.nombre_usuario,
+                email: reserva.email_usuario
+            },
+            cancelada: reserva.cancelada
+        }));
+
+        res.json(formattedResult);
     } catch (error) {
         console.error('Error al obtener reservas:', error);
-        res.status(500).json({ message: 'Error al obtener reservas' });
+        if (error.message === 'Database connection was refused' || error.message === 'Database connection was lost') {
+            return res.status(503).json({ message: 'Servicio no disponible. Inténtelo de nuevo más tarde.' });
+        }
+        res.status(500).json({ message: 'Error al obtener reservas', error: error.message });
     }
 };
 
@@ -116,25 +163,18 @@ export const putReservas = async (req, res) => {
 };
 
 export const deleteReservaByAdmin = async (req, res) => {
-    const { admin_dni, id_reserva } = req.body;
-    if (!admin_dni || !id_reserva) {
-        return res.status(400).json({ message: 'DNI del administrador e ID de la reserva son requeridos' });
+    const { id_reserva } = req.body;
+    if (!id_reserva) {
+        return res.status(400).json({ message: 'ID de la reserva es requerido' });
     }
 
     try {
-        const [adminResult] = await pool.query("SELECT id_user, id_museo FROM usuarios u JOIN admin a ON u.id_user = a.id_admin WHERE u.user_dni = ?", [admin_dni]);
-        if (adminResult.length === 0) {
-            return res.status(404).json({ message: 'Administrador no encontrado' });
-        }
-
-        const id_museo = adminResult[0].id_museo;
-
-        const [reservaResult] = await pool.query("SELECT * FROM reservas WHERE id_reserva = ? AND id_museo = ?", [id_reserva, id_museo]);
+        const [reservaResult] = await queryDatabase("SELECT * FROM reservas WHERE id_reserva = ?", [id_reserva]);
         if (reservaResult.length === 0) {
-            return res.status(404).json({ message: 'Reserva no encontrada o no pertenece a este museo' });
+            return res.status(404).json({ message: 'Reserva no encontrada' });
         }
 
-        const [rows] = await pool.query("DELETE FROM reservas WHERE id_reserva = ?", [id_reserva]);
+        const [rows] = await queryDatabase("DELETE FROM reservas WHERE id_reserva = ?", [id_reserva]);
         if (rows.affectedRows === 0) {
             return res.status(404).json({ message: 'Reserva no encontrada' });
         }
@@ -142,6 +182,9 @@ export const deleteReservaByAdmin = async (req, res) => {
         res.json({ message: 'Reserva eliminada exitosamente' });
     } catch (error) {
         console.error('Error al eliminar reserva por administrador:', error);
-        res.status(500).json({ message: 'Error al eliminar reserva por administrador' });
+        if (error.message === 'Database connection was refused' || error.message === 'Database connection was lost') {
+            return res.status(503).json({ message: 'Servicio no disponible. Inténtelo de nuevo más tarde.' });
+        }
+        res.status(500).json({ message: 'Error al eliminar reserva por administrador', error: error.message });
     }
 };
