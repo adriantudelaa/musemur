@@ -122,35 +122,24 @@ export const postReservas = async (req, res) => {
     }
 };
 
-export const putReservas = async (req, res) => {
-    const { id_reserva, user_dni, museum_name, reserva_date, reserva_hour, reserva_people } = req.body;
-    if (!id_reserva || !user_dni || !museum_name || !reserva_date || !reserva_hour || !reserva_people) {
-        return res.status(400).json({ message: 'Todos los campos son requeridos' });
+export const updateReserva = async (req, res) => {
+    const { id_reserva, cancelada } = req.body;
+    if (!id_reserva || cancelada === undefined) {
+        return res.status(400).json({ message: 'ID de la reserva y estado de cancelación son requeridos' });
     }
+
     try {
-        const [userResult] = await pool.query("SELECT id_user FROM usuarios WHERE user_dni = ?", [user_dni]);
-        if (userResult.length === 0) {
-            return res.status(404).json({ message: 'Usuario no encontrado' });
-        }
-
-        const id_user = userResult[0].id_user;
-
-        const [museoResult] = await pool.query("SELECT id_museo FROM museos WHERE museum_name = ?", [museum_name]);
-        if (museoResult.length === 0) {
-            return res.status(404).json({ message: 'Museo no encontrado' });
-        }
-
-        const id_museo = museoResult[0].id_museo;
-
-        const [rows] = await pool.query("UPDATE reservas SET id_user = ?, id_museo = ?, reserva_date = ?, reserva_hour = ?, reserva_people = ? WHERE id_reserva = ?",
-            [id_user, id_museo, reserva_date, reserva_hour, reserva_people, id_reserva]);
-        if (rows.affectedRows === 0) {
+        const [result] = await queryDatabase("UPDATE reservas SET reserva_cancel = ? WHERE id_reserva = ?", [cancelada, id_reserva]);
+        if (result.affectedRows === 0) {
             return res.status(404).json({ message: 'Reserva no encontrada' });
         }
         res.json({ message: 'Reserva actualizada exitosamente' });
     } catch (error) {
         console.error('Error al actualizar reserva:', error);
-        res.status(500).json({ message: 'Error al actualizar reserva' });
+        if (error.message === 'Database connection was refused' || error.message === 'Database connection was lost') {
+            return res.status(503).json({ message: 'Servicio no disponible. Inténtelo de nuevo más tarde.' });
+        }
+        res.status(500).json({ message: 'Error al actualizar reserva', error: error.message });
     }
 };
 
