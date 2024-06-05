@@ -172,8 +172,8 @@ export const addMuseo = async (req, res) => {
         if (exhibitions) {
             for (const expo of exhibitions) {
                 await queryDatabase(
-                    "INSERT INTO exposiciones (id_museo, expo_title, expo_desc, expo_image) VALUES (?, ?, ?, ?)",
-                    [id_museo, expo.title, expo.description, expo.image]
+                    "INSERT INTO exposiciones (id_museo, expo_title, expo_desc) VALUES (?, ?, ?, ?)",
+                    [id_museo, expo.title, expo.description]
                 );
             }
         }
