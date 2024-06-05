@@ -17,19 +17,11 @@ const queryDatabase = async (query, params) => {
 export const getReservas = async (req, res) => {
     try {
         const query = `
-            SELECT 
-                r.id_reserva AS id,
-                m.museum_name AS museo,
-                r.reserva_date AS fecha,
-                r.reserva_hour AS hora,
-                r.reserva_people AS personas,
-                u.user_first_name AS nombre_usuario,
-                u.user_email AS email_usuario,
-                r.cancelada AS cancelada
-            FROM 
-                reservas r
-                JOIN museos m ON r.id_museo = m.id_museo
-                JOIN usuarios u ON r.id_user = u.id_user;
+        SELECT r.id_reserva AS id, m.museum_name AS museo, r.reserva_date AS fecha, r.reserva_hour AS hora,
+        r.reserva_people AS personas, u.user_first_name AS nombre_usuario, u.user_email AS email_usuario, r.reserva_cancel AS cancelada
+                    FROM reservas r
+                        JOIN museos m ON r.id_museo = m.id_museo
+                        JOIN usuarios u ON r.id_user = u.id_user;
         `;
 
         const [result] = await queryDatabase(query);
@@ -88,7 +80,7 @@ export const getReservasByAdmin = async (req, res) => {
         if (adminResult.length === 0) {
             return res.status(404).json({ message: 'Administrador no encontrado' });
         }
-        
+
         const id_museo = adminResult[0].id_museo;
         const [museoResult] = await pool.query("SELECT museum_name FROM museos WHERE id_museo = ?", [id_museo]);
         const museum_name = museoResult[0].museum_name;
