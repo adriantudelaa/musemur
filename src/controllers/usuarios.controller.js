@@ -244,24 +244,3 @@ export const verifyAdminDni = async (req, res) => {
         res.status(500).json({ message: 'Error interno del servidor' });
     }
 };
-
-export const getUserByDni = async (req, res) => {
-    const { user_dni } = req.body;
-
-    if (!user_dni) {
-        return res.status(400).json({ message: 'Se requiere DNI' });
-    }
-
-    try {
-        const [rows] = await pool.query('SELECT * FROM usuarios WHERE user_dni = ?', [user_dni]);
-
-        if (rows.length === 0) {
-            return res.status(404).json({ message: 'Usuario no encontrado' });
-        }
-
-        res.status(200).json(rows[0]);
-    } catch (error) {
-        console.error('Error al obtener usuario:', error);
-        res.status(500).json({ message: 'Error interno del servidor' });
-    }
-};
