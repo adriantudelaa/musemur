@@ -71,8 +71,8 @@ export const getMuseo = async (req, res) => {
 };
 
 export const putMuseos = async (req, res) => {
-    const { museum_name, museum_city, museum_loc, museum_desc, museum_hour, exhibitions } = req.body;
-    if (!museum_name || !museum_city || !museum_loc || !museum_hour) {
+    const { museum_name, museum_city, museum_loc, museum_desc, museum_hour, museum_expo, museum_expo_desc } = req.body;
+    if (!museum_name || !museum_city || !museum_loc || !museum_hour || !museum_expo || !museum_expo_desc) {
         return res.status(400).json({ message: 'Datos incompletos' });
     }
 
@@ -86,22 +86,12 @@ export const putMuseos = async (req, res) => {
         const id_museo = museoResult[0].id_museo;
 
         const [result] = await queryDatabase(
-            "UPDATE museos SET museum_name = ?, museum_city = ?, museum_loc = ?, museum_desc = ?, museum_hour = ? WHERE id_museo = ?",
-            [museum_name, museum_city, museum_loc, museum_desc, museum_hour, id_museo]
+            "UPDATE museos SET museum_name = ?, museum_city = ?, museum_loc = ?, museum_desc = ?, museum_hour = ?, museum_expo = ?, museum_expo_desc = ? WHERE id_museo = ?",
+            [museum_name, museum_city, museum_loc, museum_desc, museum_hour, museum_expo, museum_expo_desc, id_museo]
         );
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ message: 'Museo no encontrado' });
-        }
-
-        if (exhibitions) {
-            await queryDatabase("DELETE FROM exposiciones WHERE id_museo = ?", [id_museo]);
-            for (const expo of exhibitions) {
-                await queryDatabase(
-                    "INSERT INTO exposiciones (id_museo, expo_title, expo_desc, expo_image) VALUES (?, ?, ?, ?)",
-                    [id_museo, expo.title, expo.description, expo.image]
-                );
-            }
         }
 
         res.status(200).json({ message: `Museo ${museum_name} actualizado correctamente` });
@@ -156,27 +146,18 @@ export const deleteMuseo = async (req, res) => {
 };
 
 export const addMuseo = async (req, res) => {
-    const { museum_name, museum_city, museum_loc, museum_desc, museum_hour, exhibitions } = req.body;
-    if (!museum_name || !museum_city || !museum_loc || !museum_desc || !museum_hour) {
+    const { museum_name, museum_city, museum_loc, museum_desc, museum_hour, museum_expo, museum_expo_desc } = req.body;
+    if (!museum_name || !museum_city || !museum_loc || !museum_desc || !museum_hour || !museum_expo || !museum_expo_desc) {
         return res.status(400).json({ message: 'Datos incompletos' });
     }
 
     try {
         const [result] = await queryDatabase(
-            "INSERT INTO museos (museum_name, museum_city, museum_loc, museum_desc, museum_hour) VALUES (?, ?, ?, ?, ?)",
-            [museum_name, museum_city, museum_loc, museum_desc, museum_hour]
+            "INSERT INTO museos (museum_name, museum_city, museum_loc, museum_desc, museum_hour, museum_expo, museum_expo_desc) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            [museum_name, museum_city, museum_loc, museum_desc, museum_hour, museum_expo, museum_expo_desc]
         );
 
         const id_museo = result.insertId;
-
-        if (exhibitions && exhibitions.length > 0) {
-            for (const expo of exhibitions) {
-                await queryDatabase(
-                    "INSERT INTO exposiciones (id_museo, expo_title, expo_desc) VALUES (?, ?, ?)",
-                    [id_museo, expo.title, expo.description]
-                );
-            }
-        }
 
         res.status(201).json({ message: 'Museo añadido correctamente', id_museo });
     } catch (error) {
@@ -184,32 +165,5 @@ export const addMuseo = async (req, res) => {
             return res.status(503).json({ message: 'Servicio no disponible. Inténtelo de nuevo más tarde.' });
         }
         res.status(500).json({ message: 'Error al añadir el museo', error: error.message });
-    }
-};
-
-export const getExhibitions = async (req, res) => {
-    const { museum_name } = req.body;
-    if (!museum_name) {
-        return res.status(400).json({ message: 'Nombre del museo no proporcionado' });
-    }
-
-    try {
-        const [museoResult] = await queryDatabase("SELECT id_museo FROM museos WHERE museum_name = ?", [museum_name]);
-        if (museoResult.length === 0) {
-            return res.status(404).json({ message: 'Museo no encontrado' });
-        }
-
-        const id_museo = museoResult[0].id_museo;
-        const [result] = await queryDatabase("SELECT * FROM exposiciones WHERE id_museo = ?", [id_museo]);
-
-        if (result.length === 0) {
-            return res.status(404).json({ message: 'No se encontraron exposiciones' });
-        }
-        res.status(200).json(result);
-    } catch (error) {
-        if (error.message === 'Database connection was refused' || error.message === 'Database connection was lost') {
-            return res.status(503).json({ message: 'Servicio no disponible. Inténtelo de nuevo más tarde.' });
-        }
-        res.status(500).json({ message: 'Error al obtener las exposiciones', error: error.message });
     }
 };
