@@ -244,3 +244,24 @@ export const verifyAdminDni = async (req, res) => {
         res.status(500).json({ message: 'Error interno del servidor' });
     }
 };
+
+export const getUserInfoByEmail = async (req, res) => {
+    const { user_email } = req.body;
+
+    if (!user_email) {
+        return res.status(400).json({ message: 'El correo electrónico es requerido' });
+    }
+
+    try {
+        const [rows] = await pool.query('SELECT user_first_name, user_surname, user_dni FROM usuarios WHERE user_email = ?', [user_email]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        res.status(200).json(rows[0]);
+    } catch (error) {
+        console.error('Error al obtener información del usuario:', error);
+        res.status(500).json({ message: 'Error al obtener información del usuario' });
+    }
+};
