@@ -71,20 +71,12 @@ export const getMuseo = async (req, res) => {
 };
 
 export const putMuseos = async (req, res) => {
-    const { museum_name, museum_city, museum_loc, museum_desc, museum_hour } = req.body;
-    if (!museum_name || !museum_city || !museum_loc || !museum_hour) {
+    const { id_museo, museum_name, museum_city, museum_loc, museum_desc, museum_hour } = req.body;
+    if (!id_museo || !museum_name || !museum_city || !museum_loc || !museum_hour) {
         return res.status(400).json({ message: 'Datos incompletos' });
     }
 
     try {
-        const [museoResult] = await queryDatabase("SELECT id_museo FROM museos WHERE museum_name = ?", [museum_name]);
-        
-        if (museoResult.length === 0) {
-            return res.status(404).json({ message: 'Museo no encontrado' });
-        }
-
-        const id_museo = museoResult[0].id_museo;
-
         const [result] = await queryDatabase(
             "UPDATE museos SET museum_name = ?, museum_city = ?, museum_loc = ?, museum_desc = ?, museum_hour = ? WHERE id_museo = ?",
             [museum_name, museum_city, museum_loc, museum_desc, museum_hour, id_museo]
@@ -102,6 +94,7 @@ export const putMuseos = async (req, res) => {
         res.status(500).json({ message: 'Error al actualizar el museo', error: error.message });
     }
 };
+
 
 export const deleteMuseo = async (req, res) => {
     const { museum_name } = req.body;
