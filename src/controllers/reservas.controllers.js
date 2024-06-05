@@ -19,24 +19,23 @@ export const getReservas = async (req, res) => {
         const query = `
         SELECT r.id_reserva AS id, m.museum_name AS museo, r.reserva_date AS fecha, r.reserva_hour AS hora,
         r.reserva_people AS personas, u.user_first_name AS nombre_usuario, u.user_email AS email_usuario, r.reserva_cancel AS cancelada
-                    FROM reservas r
-                        JOIN museos m ON r.id_museo = m.id_museo
-                        JOIN usuarios u ON r.id_user = u.id_user;
+        FROM reservas r
+        JOIN museos m ON r.id_museo = m.id_museo
+        JOIN usuarios u ON r.id_user = u.id_user;
         `;
 
         const [result] = await queryDatabase(query);
 
         const formattedResult = result.map(reserva => ({
-            id: reserva.id,
+            id: reserva.id.toString(), // Convert id to string
             museo: reserva.museo,
-            fecha: reserva.fecha,
-            hora: reserva.hora,
+            fecha: reserva.fecha.toISOString().split('T')[0], // Format date as YYYY-MM-DD
             detalles: `Reserva para ${reserva.personas} personas a las ${reserva.hora}`,
             usuario: {
                 nombre: reserva.nombre_usuario,
                 email: reserva.email_usuario
             },
-            cancelada: reserva.cancelada
+            cancelada: Boolean(reserva.cancelada) // Convert to boolean
         }));
 
         res.json(formattedResult);
@@ -48,6 +47,7 @@ export const getReservas = async (req, res) => {
         res.status(500).json({ message: 'Error al obtener reservas', error: error.message });
     }
 };
+
 
 export const getReservasByUser = async (req, res) => {
     const { user_dni } = req.body;
