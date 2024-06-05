@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getAllExposiciones, getExposicionesByMuseum, addExposicion, editExposicion, deleteExposicion } from "../controllers/exposiciones.controller";
+import { getAllExposiciones, getExposicionesByMuseum, addExposicion, editExposicion, deleteExposicion } from "../controllers/exposiciones.controller.js";
 
 const router = Router();
 
