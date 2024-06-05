@@ -11,8 +11,8 @@ router.post("/museosName", getMuseo);
 
 router.put("/museos", putMuseos);
 
-router.delete("/museos", deleteMuseo);  // Cambiar a POST para eliminar museo usando una variable
+router.delete("/museos", deleteMuseo);
 
-router.post("/addMuseo", addMuseo);  // Ruta para añadir museo
+router.post("/addMuseo", addMuseo);
 
 export default router;
