@@ -137,3 +137,22 @@ export const deleteMuseo = async (req, res) => {
         res.status(500).json({ message: 'Error al eliminar museo' });
     }
 };
+export const addMuseo = async (req, res) => {
+    const { museum_name, museum_city, museum_loc, museum_desc, museum_hour, museum_img } = req.body;
+    if (!museum_name || !museum_city || !museum_loc || !museum_desc || !museum_hour) {
+        return res.status(400).json({ message: 'Datos incompletos' });
+    }
+
+    try {
+        const [result] = await queryDatabase(
+            "INSERT INTO museos (museum_name, museum_city, museum_loc, museum_desc, museum_hour) VALUES (?, ?, ?, ?, ?)",
+            [museum_name, museum_city, museum_loc, museum_desc, museum_hour, museum_img]
+        );
+        res.status(201).json({ message: 'Museo añadido correctamente', id_museo: result.insertId });
+    } catch (error) {
+        if (error.message === 'Database connection was refused' || error.message === 'Database connection was lost') {
+            return res.status(503).json({ message: 'Servicio no disponible. Inténtelo de nuevo más tarde.' });
+        }
+        res.status(500).json({ message: 'Error al añadir el museo', error: error.message });
+    }
+};
