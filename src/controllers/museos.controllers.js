@@ -71,15 +71,24 @@ export const getMuseo = async (req, res) => {
 };
 
 export const putMuseos = async (req, res) => {
-    const { id_museo, museum_name, museum_city, museum_loc, museum_desc, museum_hour, museum_img } = req.body;
-    if (!id_museo || !museum_name || !museum_city || !museum_loc || !museum_hour || !museum_img) {
+    const { museum_name, museum_city, museum_loc, museum_desc, museum_hour } = req.body;
+    if (!museum_name || !museum_city || !museum_loc || !museum_hour) {
         return res.status(400).json({ message: 'Datos incompletos' });
     }
 
     try {
-        const [result] = await queryDatabase("UPDATE museos SET museum_name = ?, museum_city = ?, museum_loc = ?, museum_desc = ?, museum_hour = ?, museum_img = ? WHERE id_museo = ?",
-            [museum_name, museum_city, museum_loc, museum_desc, museum_hour, museum_img, id_museo]);
-        if (result.affectedRows === 0) {
+        // Primero, obtener el ID del museo por su nombre
+        const [resultId] = await queryDatabase("SELECT id_museo FROM museos WHERE museum_name = ?", [museum_name]);
+        if (resultId.length === 0) {
+            return res.status(404).json({ message: 'Museo no encontrado' });
+        }
+
+        const id_museo = resultId[0].id_museo;
+
+        // Luego, actualizar los datos del museo
+        const [resultUpdate] = await queryDatabase("UPDATE museos SET museum_name = ?, museum_city = ?, museum_loc = ?, museum_desc = ?, museum_hour = ? WHERE id_museo = ?",
+            [museum_name, museum_city, museum_loc, museum_desc, museum_hour, id_museo]);
+        if (resultUpdate.affectedRows === 0) {
             return res.status(404).json({ message: 'Museo no encontrado' });
         }
         res.status(200).json({ message: `Museo ${museum_name} actualizado correctamente` });
