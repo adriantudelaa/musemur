@@ -22,5 +22,6 @@ router.post('/ResetPassword', resetPassword);
 router.post('/VerifyAdminDni', verifyAdminDni);
 
 router.post('/getUserByDni', getUserByDni);
+// router.post("/reservas/user", getReservasByUser);
 
 export default router;
