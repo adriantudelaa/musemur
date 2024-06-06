@@ -1,11 +1,12 @@
 import { Router } from "express";
-import { seeUsers, createUser, updateUserData, updateUserPswrd, deleteUser, loginUser, loginAdmin, resetPassword, verifyAdminDni, getUserProfile, getAdminProfile } from "../controllers/usuarios.controller.js";
+import { seeUsers, createUser, createAdmin, updateUserData, updateUserPswrd, deleteUser, loginUser, loginAdmin, resetPassword, verifyAdminDni, getUserProfile, getAdminProfile } from "../controllers/usuarios.controller.js";
 import { verifyToken } from '../../middlewares/auth.js';
 
 const router = Router();
 
-router.get("/User", verifyToken, seeUsers);
+router.get("/User", verifyToken, seeUsers);S
 router.post("/User", createUser);
+router.post("/Admin", createAdmin);
 router.put("/UserData", verifyToken, updateUserData);
 router.put("/UserPswrd", verifyToken, updateUserPswrd);
 router.delete("/User", verifyToken, deleteUser);

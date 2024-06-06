@@ -60,6 +60,61 @@ export const createUser = async (req, res) => {
     }
 };
 
+export const createAdmin = async (req, res) => {
+    const { user_first_name, user_surname, username, user_phone, user_email, user_dni, user_pswrd, id_museo } = req.body;
+    
+    if (!user_first_name || !user_surname || !username || !user_phone || !user_email || !user_dni || !user_pswrd || !id_museo) {
+        return res.status(400).json({ message: 'Todos los campos son requeridos' });
+    }
+
+    // Validar la contraseña
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+    if (!passwordRegex.test(user_pswrd)) {
+        return res.status(400).json({ message: 'La contraseña debe tener al menos 8 caracteres, una letra mayúscula, una letra minúscula y un número.' });
+    }
+
+    try {
+        // Verificar si el nombre de usuario ya existe
+        const [existingUsername] = await pool.query("SELECT * FROM usuarios WHERE username = ?", [username]);
+        if (existingUsername.length > 0) {
+            return res.status(409).json({ message: 'El nombre de usuario ya está en uso.' });
+        }
+
+        // Verificar si el DNI ya existe
+        const [existingDni] = await pool.query("SELECT * FROM usuarios WHERE user_dni = ?", [user_dni]);
+        if (existingDni.length > 0) {
+            return res.status(409).json({ message: 'El DNI ya está en uso.' });
+        }
+
+        const user_rol = 1; // Asignar rol de administrador
+
+        const [rows] = await pool.query("INSERT INTO usuarios (user_first_name, user_surname, username, user_phone, user_email, user_dni, user_pswrd, user_rol) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            [user_first_name, user_surname, username, user_phone, user_email, user_dni, user_pswrd, user_rol]);
+
+        const id_user = rows.insertId;
+
+        // Asignar el usuario al museo
+        await pool.query("UPDATE museos SET id_admin = ? WHERE id_museo = ?", [id_user, id_museo]);
+
+        res.status(201).json({
+            message: 'Administrador registrado exitosamente',
+            user_first_name,
+            user_surname,
+            username,
+            user_phone,
+            user_email,
+            user_dni,
+            user_pswrd,
+            user_rol,
+            id_museo
+        });
+    } catch (error) {
+        console.error('Error al crear administrador:', error);
+        res.status(500).json({ message: 'Error al crear administrador' });
+    }
+};
+
+
 export const updateUserData = async (req, res) => {
     const { user_first_name, user_surname, user_email, user_dni } = req.body;
     const userId = req.userId; // Asegúrate de que este ID se obtiene correctamente del middleware de autenticación
