@@ -16,15 +16,15 @@ const queryDatabase = async (query, params) => {
 };
 
 export const addExhibition = async (req, res) => {
-    const { id_museo, expo_title, expo_desc, expo_image } = req.body;
+    const { id_museo, expo_title, expo_desc } = req.body;
     if (!id_museo || !expo_title || !expo_desc) {
         return res.status(400).json({ message: 'Datos incompletos' });
     }
 
     try {
         const [result] = await queryDatabase(
-            "INSERT INTO exposiciones (id_museo, expo_title, expo_desc, expo_image) VALUES (?, ?, ?, ?)",
-            [id_museo, expo_title, expo_desc, expo_image]
+            "INSERT INTO exposiciones (id_museo, expo_title, expo_desc) VALUES (?, ?, ?)",
+            [id_museo, expo_title, expo_desc]
         );
 
         res.status(201).json({ message: 'Exposición añadida correctamente', id_expo: result.insertId });
@@ -63,15 +63,15 @@ export const getExhibitionsByMuseum = async (req, res) => {
 };
 
 export const updateExhibition = async (req, res) => {
-    const { id_expo, expo_title, expo_desc, expo_image } = req.body;
-    if (!id_expo || !expo_title || !expo_desc || !expo_image) {
+    const { id_expo, expo_title, expo_desc } = req.body;
+    if (!id_expo || !expo_title || !expo_desc) {
         return res.status(400).json({ message: 'Datos incompletos' });
     }
 
     try {
         const [result] = await queryDatabase(
-            "UPDATE exposiciones SET expo_title = ?, expo_desc = ?, expo_image = ? WHERE id_expo = ?",
-            [expo_title, expo_desc, expo_image, id_expo]
+            "UPDATE exposiciones SET expo_title = ?, expo_desc = ? WHERE id_expo = ?",
+            [expo_title, expo_desc, id_expo]
         );
 
         if (result.affectedRows === 0) {
