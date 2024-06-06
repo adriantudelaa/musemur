@@ -30,6 +30,7 @@ export const getReservas = async (req, res) => {
             id: reserva.id.toString(), // Convert id to string
             museo: reserva.museo,
             fecha: reserva.fecha.toISOString().split('T')[0], // Format date as YYYY-MM-DD
+            hora: reserva.hora, // Keep time format as it is
             detalles: `Reserva para ${reserva.personas} personas a las ${reserva.hora}`,
             usuario: {
                 nombre: reserva.nombre_usuario,
@@ -122,7 +123,7 @@ export const putReservas = async (req, res) => {
     const userId = req.userId; // Obtén el ID del usuario autenticado desde el token
     const { id_reserva, cancelada } = req.body;
 
-    if (!id_reserva || typeof cancelada !== 'boolean') {
+    if (!id_reserva || typeof cancelada === 'undefined') {
         return res.status(400).json({ message: 'ID de reserva y estado de cancelación son requeridos' });
     }
 
@@ -140,10 +141,10 @@ export const putReservas = async (req, res) => {
         if (rows.affectedRows === 0) {
             return res.status(404).json({ message: 'Reserva no encontrada' });
         }
-        res.json({ message: 'Reserva cancelada exitosamente' });
+        res.json({ message: 'Reserva actualizada exitosamente' });
     } catch (error) {
-        console.error('Error al cancelar reserva:', error);
-        res.status(500).json({ message: 'Error al cancelar reserva' });
+        console.error('Error al actualizar reserva:', error);
+        res.status(500).json({ message: 'Error al actualizar reserva' });
     }
 };
 
