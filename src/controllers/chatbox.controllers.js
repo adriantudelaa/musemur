@@ -1,6 +1,5 @@
 import { pool } from "../db.js";
 
-// Helper function to handle database queries
 const queryDatabase = async (query, params) => {
     try {
         return await pool.query(query, params);
@@ -17,7 +16,7 @@ const queryDatabase = async (query, params) => {
 
 export const getChatboxQues = async (req, res) => {
     try {
-        const [result] = await queryDatabase("SELECT cb_que from chatbox;");
+        const [result] = await queryDatabase("SELECT * from chatbox;");
         if (result.length === 0) {
             return res.status(404).json({ message: 'No se encontraron preguntas en el chatbox' });
         }
@@ -42,7 +41,7 @@ export const getChatboxByQues = async (req, res) => {
             return res.status(404).json({ message: 'Pregunta no encontrada' });
         }
         const result = question[0];
-        return res.status(200).json({ message: result.cb_res });
+        return res.status(200).json(result);
     } catch (error) {
         if (error.message === 'Database connection was refused' || error.message === 'Database connection was lost') {
             return res.status(503).json({ message: 'Servicio no disponible. Inténtelo de nuevo más tarde.' });
@@ -58,12 +57,11 @@ export const getChatboxByMuseum = async (req, res) => {
     }
 
     try {
-        const [question] = await queryDatabase("SELECT cb_que from chatbox where id_museo = ?;", [id_museo]);
-        if (question.length === 0) {
+        const [questions] = await queryDatabase("SELECT * from chatbox where id_museo = ?;", [id_museo]);
+        if (questions.length === 0) {
             return res.status(404).json({ message: 'Preguntas no encontradas para el museo especificado' });
         }
-        const result = question[0];
-        return res.status(200).json({ message: result.cb_res });
+        return res.status(200).json(questions);
     } catch (error) {
         if (error.message === 'Database connection was refused' || error.message === 'Database connection was lost') {
             return res.status(503).json({ message: 'Servicio no disponible. Inténtelo de nuevo más tarde.' });
@@ -79,7 +77,7 @@ export const postChatbox = async (req, res) => {
     }
 
     try {
-        await queryDatabase("INSERT INTO chatbox (cb_que, cb_res, reserva_museum) VALUES (?, ?, ?)",
+        await queryDatabase("INSERT INTO chatbox (cb_que, cb_res, id_museo) VALUES (?, ?, ?)",
             [cb_que, cb_res, reserva_museum]);
         res.status(201).json({
             message: `Pregunta insertada correctamente\nPregunta: ${cb_que}\nRespuesta: ${cb_res}\nMuseo: ${reserva_museum}`
