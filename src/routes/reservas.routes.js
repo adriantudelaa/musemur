@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getReservas, getReservasByUser, getReservasByAdmin, postReservas, updateReserva, deleteReservaByAdmin } from "../controllers/reservas.controllers.js";
+import { getReservas, getReservasByUser, getReservasByAdmin, postReservas, putReservas, deleteReservaByAdmin } from "../controllers/reservas.controllers.js";
 
 const router = Router();
 
@@ -11,7 +11,7 @@ router.post("/reservas/admin", getReservasByAdmin);
 
 router.post("/reservas", postReservas);
 
-router.put("/reservas", updateReserva);
+router.put("/reservas", putReservas);
 
 router.delete("/reservas/admin", deleteReservaByAdmin);
 
