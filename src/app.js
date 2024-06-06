@@ -1,4 +1,5 @@
 import express from 'express';
+import usuariosRoutes from './routes/usuarios.routes.js';
 
 import usuariosRoutes from './routes/usuarios.routes.js';
 import museosRoutes from './routes/museos.routes.js';

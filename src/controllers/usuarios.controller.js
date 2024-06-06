@@ -1,4 +1,8 @@
+import jwt from 'jsonwebtoken';
 import { pool } from "../db.js";
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 export const seeUsers = async (req, res) => {
     try {
@@ -138,6 +142,8 @@ export const deleteUser = async (req, res) => {
     }
 };
 
+const { JWT_SECRET, JWT_EXPIRES_IN } = process.env;
+
 export const loginUser = async (req, res) => {
     const { user_email, user_pswrd } = req.body;
 
@@ -158,14 +164,20 @@ export const loginUser = async (req, res) => {
             return res.status(401).json({ message: 'Contraseña incorrecta' });
         }
 
-        res.status(200).json({ id: user.id_user, message: 'Iniciado sesión como ' + user.username });
+        // Generar un token JWT
+        const token = jwt.sign(
+            { id: user.id_user, username: user.username, role: user.user_rol },
+            JWT_SECRET,
+            { expiresIn: JWT_EXPIRES_IN }
+        );
+
+        res.status(200).json({ token, message: 'Iniciado sesión como ' + user.username });
 
     } catch (error) {
         console.error('Error al iniciar sesión:', error);
         res.status(500).json({ message: 'Error interno del servidor' });
     }
 };
-
 export const loginAdmin = async (req, res) => {
     const { user_dni, user_pswrd } = req.body;
 
