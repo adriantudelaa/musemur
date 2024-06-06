@@ -265,3 +265,20 @@ export const verifyAdminDni = async (req, res) => {
         res.status(500).json({ message: 'Error interno del servidor' });
     }
 };
+
+export const getUserProfile = async (req, res) => {
+    const userId = req.userId; // Obtener el ID del usuario del token
+
+    try {
+        const [rows] = await pool.query('SELECT user_first_name, user_surname, username, user_phone, user_email, user_dni FROM usuarios WHERE id_user = ?', [userId]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        res.status(200).json(rows[0]);
+    } catch (error) {
+        console.error('Error al obtener perfil del usuario:', error);
+        res.status(500).json({ message: 'Error interno del servidor' });
+    }
+};
