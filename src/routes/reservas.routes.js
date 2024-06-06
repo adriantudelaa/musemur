@@ -1,11 +1,13 @@
 import { Router } from "express";
-import { getReservas, getReservasByUser, getReservasByAdmin, postReservas, updateReserva, deleteReservaByAdmin } from "../controllers/reservas.controllers.js";
+import { getReservas, getUserReservations, getReservasByAdmin, postReservas, updateReserva, deleteReservaByAdmin } from "../controllers/reservas.controllers.js";
+import { verifyToken } from '../middlewares/auth.js';
+
 
 const router = Router();
 
 router.get("/reservas", getReservas);
 
-router.post("/reservas/user", getReservasByUser);
+router.get("/reservas/user",verifyToken, getUserReservations);
 
 router.post("/reservas/admin", getReservasByAdmin);
 
