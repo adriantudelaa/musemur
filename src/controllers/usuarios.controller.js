@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+const { JWT_SECRET, JWT_EXPIRES_IN } = process.env;
+
 export const seeUsers = async (req, res) => {
     try {
         const [result] = await pool.query("SELECT * from usuarios;");
@@ -142,8 +144,6 @@ export const deleteUser = async (req, res) => {
     }
 };
 
-const { JWT_SECRET, JWT_EXPIRES_IN } = process.env;
-
 export const loginUser = async (req, res) => {
     const { user_email, user_pswrd } = req.body;
 
@@ -178,6 +178,7 @@ export const loginUser = async (req, res) => {
         res.status(500).json({ message: 'Error interno del servidor' });
     }
 };
+
 export const loginAdmin = async (req, res) => {
     const { user_dni, user_pswrd } = req.body;
 
@@ -202,7 +203,14 @@ export const loginAdmin = async (req, res) => {
             return res.status(403).json({ message: 'Acceso denegado: no es administrador' });
         }
 
-        res.status(200).json({ message: 'Iniciado sesión como administrador ' + user.username });
+        // Generar un token JWT
+        const token = jwt.sign(
+            { id: user.id_user, username: user.username, role: user.user_rol },
+            JWT_SECRET,
+            { expiresIn: JWT_EXPIRES_IN }
+        );
+
+        res.status(200).json({ token, message: 'Iniciado sesión como administrador ' + user.username });
 
     } catch (error) {
         console.error('Error al iniciar sesión:', error);
@@ -236,6 +244,7 @@ export const resetPassword = async (req, res) => {
         res.status(500).json({ message: 'Error interno del servidor' });
     }
 };
+
 export const verifyAdminDni = async (req, res) => {
     const { user_dni } = req.body;
 
@@ -256,4 +265,3 @@ export const verifyAdminDni = async (req, res) => {
         res.status(500).json({ message: 'Error interno del servidor' });
     }
 };
-
