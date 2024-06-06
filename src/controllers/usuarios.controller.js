@@ -171,7 +171,7 @@ export const loginUser = async (req, res) => {
             { expiresIn: JWT_EXPIRES_IN }
         );
 
-        res.status(200).json({ token, message: 'Iniciado sesión como ' + user.username });
+        res.status(200).json({ token, userName: user.user_first_name, message: 'Iniciado sesión como ' + user.username });
 
     } catch (error) {
         console.error('Error al iniciar sesión:', error);
