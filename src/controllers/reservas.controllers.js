@@ -50,32 +50,19 @@ export const getReservas = async (req, res) => {
 
 
 export const getReservasByUser = async (req, res) => {
-    const { user_id } = req.body;
-    if (!user_id) {
-        return res.status(400).json({ message: 'ID de usuario es requerido' });
+    const { user_dni } = req.body;
+    if (!user_dni) {
+        return res.status(400).json({ message: 'DNI de usuario es requerido' });
     }
     try {
-        const query = `
-            SELECT r.id_reserva AS id, m.museum_name AS museo, r.reserva_date AS fecha, r.reserva_hour AS hora,
-            r.reserva_people AS personas, u.user_first_name AS nombre_usuario, u.user_email AS email_usuario, r.reserva_cancel AS cancelada
-            FROM reservas r
-            JOIN museos m ON r.id_museo = m.id_museo
-            JOIN usuarios u ON r.id_user = u.id_user
-            WHERE r.id_user = ?;
-        `;
-        const [result] = await queryDatabase(query, [user_id]);
-        const formattedResult = result.map(reserva => ({
-            id: reserva.id.toString(),
-            museo: reserva.museo,
-            fecha: reserva.fecha.toISOString().split('T')[0],
-            detalles: `Reserva para ${reserva.personas} personas a las ${reserva.hora}`,
-            usuario: {
-                nombre: reserva.nombre_usuario,
-                email: reserva.email_usuario
-            },
-            cancelada: Boolean(reserva.cancelada)
-        }));
-        res.json(formattedResult);
+        const [userResult] = await pool.query("SELECT id_user FROM usuarios WHERE user_dni = ?", [user_dni]);
+        if (userResult.length === 0) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        const id_user = userResult[0].id_user;
+        const [result] = await pool.query("SELECT * FROM reservas WHERE id_user = ?;", [id_user]);
+        res.json(result);
     } catch (error) {
         console.error('Error al obtener reservas por usuario:', error);
         res.status(500).json({ message: 'Error al obtener reservas por usuario' });
@@ -135,24 +122,35 @@ export const postReservas = async (req, res) => {
     }
 };
 
-export const updateReserva = async (req, res) => {
-    const { id_reserva, cancelada } = req.body;
-    if (!id_reserva || cancelada === undefined) {
-        return res.status(400).json({ message: 'ID de la reserva y estado de cancelación son requeridos' });
+export const putReservas = async (req, res) => {
+    const { id_reserva, user_dni, museum_name, reserva_date, reserva_hour, reserva_people } = req.body;
+    if (!id_reserva || !user_dni || !museum_name || !reserva_date || !reserva_hour || !reserva_people) {
+        return res.status(400).json({ message: 'Todos los campos son requeridos' });
     }
-
     try {
-        const [result] = await queryDatabase("UPDATE reservas SET reserva_cancel = ? WHERE id_reserva = ?", [cancelada, id_reserva]);
-        if (result.affectedRows === 0) {
+        const [userResult] = await pool.query("SELECT id_user FROM usuarios WHERE user_dni = ?", [user_dni]);
+        if (userResult.length === 0) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        const id_user = userResult[0].id_user;
+
+        const [museoResult] = await pool.query("SELECT id_museo FROM museos WHERE museum_name = ?", [museum_name]);
+        if (museoResult.length === 0) {
+            return res.status(404).json({ message: 'Museo no encontrado' });
+        }
+
+        const id_museo = museoResult[0].id_museo;
+
+        const [rows] = await pool.query("UPDATE reservas SET id_user = ?, id_museo = ?, reserva_date = ?, reserva_hour = ?, reserva_people = ? WHERE id_reserva = ?",
+            [id_user, id_museo, reserva_date, reserva_hour, reserva_people, id_reserva]);
+        if (rows.affectedRows === 0) {
             return res.status(404).json({ message: 'Reserva no encontrada' });
         }
         res.json({ message: 'Reserva actualizada exitosamente' });
     } catch (error) {
         console.error('Error al actualizar reserva:', error);
-        if (error.message === 'Database connection was refused' || error.message === 'Database connection was lost') {
-            return res.status(503).json({ message: 'Servicio no disponible. Inténtelo de nuevo más tarde.' });
-        }
-        res.status(500).json({ message: 'Error al actualizar reserva', error: error.message });
+        res.status(500).json({ message: 'Error al actualizar reserva' });
     }
 };
 
@@ -180,26 +178,5 @@ export const deleteReservaByAdmin = async (req, res) => {
             return res.status(503).json({ message: 'Servicio no disponible. Inténtelo de nuevo más tarde.' });
         }
         res.status(500).json({ message: 'Error al eliminar reserva por administrador', error: error.message });
-    }
-};
-
-export const getUserReservations = async (req, res) => {
-    try {
-        const token = req.headers['authorization'].split(' ')[1];
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const userId = decoded.id;
-
-        const [result] = await pool.query(`
-            SELECT r.id_reserva AS id, m.museum_name AS museo, r.reserva_date AS fecha, r.reserva_hour AS hora,
-            r.reserva_people AS personas, r.reserva_cancel AS cancelada, u.user_first_name AS usuario
-            FROM reservas r
-            JOIN museos m ON r.id_museo = m.id_museo
-            JOIN usuarios u ON r.id_user = u.id_user
-            WHERE r.id_user = ?`, [userId]);
-
-        res.json(result);
-    } catch (error) {
-        console.error('Error al obtener reservas del usuario:', error);
-        res.status(500).json({ message: 'Error al obtener reservas del usuario' });
     }
 };
