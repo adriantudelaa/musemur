@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { getReservas, getUserReservations, getReservasByAdmin, postReservas, updateReserva, deleteReservaByAdmin } from "../controllers/reservas.controllers.js";
-import { verifyToken } from '../middlewares/auth.js';
+import { verifyToken } from '../../middlewares/auth.js';
 
 
 const router = Router();
