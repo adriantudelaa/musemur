@@ -4,18 +4,12 @@ import { getReservas, getReservasByUser, getReservasByAdmin, postReservas, putRe
 
 const router = Router();
 
-router.get("/reservas", getReservas);
-
-router.post("/reservas/user", getReservasByUser);
-
-router.post("/reservas/admin", getReservasByAdmin);
-
-router.post("/reservas", verifyToken, postReservas);
-
-router.put("/reservas", putReservas);
-
-router.delete("/reservas/admin", deleteReservaByAdmin);
-
+router.get('/reservas', verifyToken, getReservas);
+router.post('/reservas/user', verifyToken, getReservasByUser);
+router.post('/reservas/admin', verifyToken, getReservasByAdmin);
+router.post('/reservas', verifyToken, postReservas);
+router.put('/reservas', verifyToken, putReservas);
+router.delete('/reservas/admin', verifyToken, deleteReservaByAdmin);
 router.get('/reservas/user', verifyToken, getUserReservations);
 
 export default router;
