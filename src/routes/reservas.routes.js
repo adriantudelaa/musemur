@@ -6,7 +6,6 @@ const router = Router();
 
 router.get('/reservas', verifyToken, getReservas);
 router.post('/reservas/user', verifyToken, getReservasByUser);
-router.post('/reservas/admin', verifyToken, getReservasByAdmin);
 router.post('/reservas', verifyToken, postReservas);
 router.put('/reservas', verifyToken, putReservas);
 router.delete('/reservas/admin', verifyToken, deleteReservaByAdmin);
