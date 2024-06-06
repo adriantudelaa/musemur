@@ -49,24 +49,36 @@ export const getReservas = async (req, res) => {
 };
 
 
-export const getUserReservations = async (req, res) => {
+export const getReservasByUser = async (req, res) => {
+    const { user_id } = req.body;
+    if (!user_id) {
+        return res.status(400).json({ message: 'ID de usuario es requerido' });
+    }
     try {
-        const token = req.headers['authorization'].split(' ')[1];
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const userId = decoded.id;
-
-        const [result] = await pool.query(`
+        const query = `
             SELECT r.id_reserva AS id, m.museum_name AS museo, r.reserva_date AS fecha, r.reserva_hour AS hora,
-            r.reserva_people AS personas, r.reserva_cancel AS cancelada, u.user_first_name AS usuario
+            r.reserva_people AS personas, u.user_first_name AS nombre_usuario, u.user_email AS email_usuario, r.reserva_cancel AS cancelada
             FROM reservas r
             JOIN museos m ON r.id_museo = m.id_museo
             JOIN usuarios u ON r.id_user = u.id_user
-            WHERE r.id_user = ?`, [userId]);
-
-        res.json(result);
+            WHERE r.id_user = ?;
+        `;
+        const [result] = await queryDatabase(query, [user_id]);
+        const formattedResult = result.map(reserva => ({
+            id: reserva.id.toString(),
+            museo: reserva.museo,
+            fecha: reserva.fecha.toISOString().split('T')[0],
+            detalles: `Reserva para ${reserva.personas} personas a las ${reserva.hora}`,
+            usuario: {
+                nombre: reserva.nombre_usuario,
+                email: reserva.email_usuario
+            },
+            cancelada: Boolean(reserva.cancelada)
+        }));
+        res.json(formattedResult);
     } catch (error) {
-        console.error('Error al obtener reservas del usuario:', error);
-        res.status(500).json({ message: 'Error al obtener reservas del usuario' });
+        console.error('Error al obtener reservas por usuario:', error);
+        res.status(500).json({ message: 'Error al obtener reservas por usuario' });
     }
 };
 
@@ -168,5 +180,26 @@ export const deleteReservaByAdmin = async (req, res) => {
             return res.status(503).json({ message: 'Servicio no disponible. Inténtelo de nuevo más tarde.' });
         }
         res.status(500).json({ message: 'Error al eliminar reserva por administrador', error: error.message });
+    }
+};
+
+export const getUserReservations = async (req, res) => {
+    try {
+        const token = req.headers['authorization'].split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.id;
+
+        const [result] = await pool.query(`
+            SELECT r.id_reserva AS id, m.museum_name AS museo, r.reserva_date AS fecha, r.reserva_hour AS hora,
+            r.reserva_people AS personas, r.reserva_cancel AS cancelada, u.user_first_name AS usuario
+            FROM reservas r
+            JOIN museos m ON r.id_museo = m.id_museo
+            JOIN usuarios u ON r.id_user = u.id_user
+            WHERE r.id_user = ?`, [userId]);
+
+        res.json(result);
+    } catch (error) {
+        console.error('Error al obtener reservas del usuario:', error);
+        res.status(500).json({ message: 'Error al obtener reservas del usuario' });
     }
 };

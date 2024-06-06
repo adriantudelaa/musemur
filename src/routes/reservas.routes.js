@@ -7,7 +7,7 @@ const router = Router();
 
 router.get("/reservas", getReservas);
 
-router.get("/reservas/user",verifyToken, getUserReservations);
+router.get("/reservas/user", verifyToken, getUserReservations);
 
 router.post("/reservas/admin", getReservasByAdmin);
 
