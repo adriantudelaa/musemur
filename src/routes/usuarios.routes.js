@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { seeUsers, createUser, updateUserData, updateUserPswrd, deleteUser, loginUser, loginAdmin, resetPassword, verifyAdminDni, getUserProfile, getAdminProfile } from "../controllers/usuarios.controller.js";
+import { seeUsers, createUser, updateUserData, updateUserPswrd, deleteUser, loginUser, loginAdmin, resetPassword, verifyAdminDni, getUserProfile, getAdminProfile, getUserReservations } from "../controllers/usuarios.controller.js";
 import { verifyToken } from '../../middlewares/auth.js';
 
 const router = Router();
@@ -15,6 +15,6 @@ router.post('/ResetPassword', resetPassword);
 router.post('/VerifyAdminDni', verifyAdminDni);
 router.get('/UserProfile', verifyToken, getUserProfile);
 router.get('/AdminProfile', verifyToken, getAdminProfile);
-
+router.post('/reservas/user', verifyToken, getUserReservations);
 
 export default router;

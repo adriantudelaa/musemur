@@ -312,3 +312,27 @@ export const getAdminProfile = async (req, res) => {
         res.status(500).json({ message: 'Error interno del servidor' });
     }
 };
+
+export const getUserReservations = async (req, res) => {
+    const userId = req.userId; // Asegúrate de que este ID se obtiene correctamente del middleware de autenticación
+
+    try {
+        const [rows] = await pool.query(`
+            SELECT r.id_reserva AS id, m.museum_name AS museo, r.reserva_date AS fecha, r.reserva_hour AS hora,
+            r.reserva_people AS personas, u.user_first_name AS nombre_usuario, u.user_email AS email_usuario, r.reserva_cancel AS cancelada
+            FROM reservas r
+            JOIN museos m ON r.id_museo = m.id_museo
+            JOIN usuarios u ON r.id_user = u.id_user
+            WHERE r.id_user = ?
+        `, [userId]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'No se encontraron reservas para este usuario' });
+        }
+
+        res.json(rows);
+    } catch (error) {
+        console.error('Error al obtener las reservas del usuario:', error);
+        res.status(500).json({ message: 'Error al obtener las reservas del usuario' });
+    }
+};
