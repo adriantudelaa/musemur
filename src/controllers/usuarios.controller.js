@@ -61,30 +61,33 @@ export const createUser = async (req, res) => {
 };
 
 export const updateUserData = async (req, res) => {
-    const { user_first_name, user_surname, username, user_phone, user_email } = req.body;
-    
-    if (!user_first_name || !user_surname || !username || !user_phone || !user_email) {
+    const { user_first_name, user_surname, user_email, user_dni } = req.body;
+    const userId = req.userId; // Asegúrate de que este ID se obtiene correctamente del middleware de autenticación
+
+    if (!user_first_name || !user_surname || !user_email || !user_dni) {
         return res.status(400).json({ message: 'Todos los campos son requeridos' });
     }
 
     try {
-        const [rows] = await pool.query("UPDATE usuarios SET user_first_name = ?, user_surname = ?, username = ?, user_phone = ?, user_email = ? WHERE user_email = ?",
-            [user_first_name, user_surname, username, user_phone, user_email, user_email]);
+        const [rows] = await pool.query("UPDATE usuarios SET user_first_name = ?, user_surname = ?, user_email = ?, user_dni = ? WHERE id_user = ?",
+            [user_first_name, user_surname, user_email, user_dni, userId]);
+
         if (rows.affectedRows === 0) {
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
+
         res.json({
             user_first_name,
             user_surname,
-            username,
-            user_phone,
-            user_email
+            user_email,
+            user_dni
         });
     } catch (error) {
         console.error('Error al actualizar datos del usuario:', error);
         res.status(500).json({ message: 'Error al actualizar datos del usuario' });
     }
 };
+
 
 export const updateUserPswrd = async (req, res) => {
     const { user_pswrd, user_email } = req.body;
@@ -267,19 +270,19 @@ export const verifyAdminDni = async (req, res) => {
 };
 
 export const getUserProfile = async (req, res) => {
-    const userId = req.userId; // Obtener el ID del usuario del token
+    const userId = req.userId; // Asegúrate de que este ID se obtiene correctamente del middleware de autenticación
 
     try {
-        const [rows] = await pool.query('SELECT user_first_name, user_surname, username, user_phone, user_email, user_dni FROM usuarios WHERE id_user = ?', [userId]);
+        const [rows] = await pool.query("SELECT * FROM usuarios WHERE id_user = ?", [userId]);
 
         if (rows.length === 0) {
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
 
-        res.status(200).json(rows[0]);
+        res.json(rows[0]);
     } catch (error) {
-        console.error('Error al obtener perfil del usuario:', error);
-        res.status(500).json({ message: 'Error interno del servidor' });
+        console.error('Error al obtener el perfil del usuario:', error);
+        res.status(500).json({ message: 'Error al obtener el perfil del usuario' });
     }
 };
 
