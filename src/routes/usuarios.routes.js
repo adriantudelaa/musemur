@@ -1,5 +1,3 @@
-// routes/usuarios.routes.js
-
 import { Router } from "express";
 import { seeUsers, createUser, updateUserData, updateUserPswrd, deleteUser, loginUser, loginAdmin, resetPassword, verifyAdminDni } from "../controllers/usuarios.controller.js";
 import { verifyToken } from '../../middlewares/auth.js';
