@@ -6,7 +6,6 @@ import reservasRoutes from './routes/reservas.routes.js';
 import administradoresRoutes from './routes/administradores.routes.js';
 import chatboxRoutes from './routes/chatbox.routes.js';
 import exposicionesRoutes from './routes/exposiciones.routes.js';
-import adminProfileRoutes from './routes/adminProfile.routes.js'; // Asegúrate de importar las rutas del perfil de administrador
 
 const app = express();
 
@@ -18,7 +17,6 @@ app.use('/api', reservasRoutes);
 app.use('/api', administradoresRoutes);
 app.use('/api', chatboxRoutes);
 app.use('/api', exposicionesRoutes);
-app.use('/api', adminProfileRoutes); // Asegúrate de usar las rutas del perfil de administrador
 
 app.use((req, res) => {
     res.status(404).json({ message: 'Ruta no encontrada' });
