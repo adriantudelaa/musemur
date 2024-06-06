@@ -70,17 +70,18 @@ export const getChatboxByMuseum = async (req, res) => {
     }
 };
 
+
 export const postChatbox = async (req, res) => {
-    const { cb_que, cb_res, reserva_museum } = req.body;
-    if (!cb_que || !cb_res || !reserva_museum) {
+    const { cb_que, cb_res, id_museo } = req.body;
+    if (!cb_que || !cb_res || !id_museo) {
         return res.status(400).json({ message: 'Datos incompletos' });
     }
 
     try {
         await queryDatabase("INSERT INTO chatbox (cb_que, cb_res, id_museo) VALUES (?, ?, ?)",
-            [cb_que, cb_res, reserva_museum]);
+            [cb_que, cb_res, id_museo]);
         res.status(201).json({
-            message: `Pregunta insertada correctamente\nPregunta: ${cb_que}\nRespuesta: ${cb_res}\nMuseo: ${reserva_museum}`
+            message: `Pregunta insertada correctamente\nPregunta: ${cb_que}\nRespuesta: ${cb_res}\nMuseo: ${id_museo}`
         });
     } catch (error) {
         if (error.message === 'Database connection was refused' || error.message === 'Database connection was lost') {
@@ -110,6 +111,7 @@ export const putChatbox = async (req, res) => {
         res.status(500).json({ message: 'Error al actualizar la pregunta en el chatbox', error: error.message });
     }
 };
+
 
 export const deleteChatbox = async (req, res) => {
     const { id_que } = req.body;
