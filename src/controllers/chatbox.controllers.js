@@ -70,7 +70,6 @@ export const getChatboxByMuseum = async (req, res) => {
     }
 };
 
-
 export const postChatbox = async (req, res) => {
     const { cb_que, cb_res, id_museo } = req.body;
     if (!cb_que || !cb_res || !id_museo) {
