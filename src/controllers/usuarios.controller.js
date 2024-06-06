@@ -90,15 +90,23 @@ export const updateUserData = async (req, res) => {
 
 
 export const updateUserPswrd = async (req, res) => {
-    const { user_pswrd, user_email } = req.body;
+    const { user_email, current_pswrd, new_pswrd } = req.body;
     
-    if (!user_pswrd || !user_email) {
-        return res.status(400).json({ message: 'Se requiere usuario y contraseña' });
+    if (!user_email || !current_pswrd || !new_pswrd) {
+        return res.status(400).json({ message: 'Se requiere usuario, contraseña actual y nueva contraseña' });
     }
 
     try {
-        const [rows] = await pool.query("UPDATE usuarios SET user_pswrd = ? WHERE user_email = ?",
-            [user_pswrd, user_email]);
+        // Verificar si la contraseña actual es correcta
+        const [user] = await pool.query('SELECT user_pswrd FROM usuarios WHERE user_email = ?', [user_email]);
+
+        if (user.length === 0 || user[0].user_pswrd !== current_pswrd) {
+            return res.status(401).json({ message: 'Contraseña actual incorrecta' });
+        }
+
+        // Actualizar la contraseña
+        const [rows] = await pool.query("UPDATE usuarios SET user_pswrd = ? WHERE user_email = ?", [new_pswrd, user_email]);
+        
         if (rows.affectedRows === 0) {
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
@@ -110,6 +118,7 @@ export const updateUserPswrd = async (req, res) => {
         res.status(500).json({ message: 'Error al actualizar contraseña' });
     }
 };
+
 
 export const deleteUser = async (req, res) => {
     const { username } = req.body;
