@@ -1,16 +1,16 @@
 import { Router } from "express";
-import { getAllExposiciones, getExposicionesByMuseum, addExposicion, editExposicion, deleteExposicion } from "../controllers/exposiciones.controller.js";
+import { addExhibition, getExhibitionsByMuseum, updateExhibition, deleteExhibitionsByMuseum, deleteExhibition } from "../controllers/exposiciones.controller.js";
 
 const router = Router();
 
-router.get("/exposiciones", getAllExposiciones);
+router.post("/exposiciones", addExhibition);
 
-router.post("/exposiciones/museum", getExposicionesByMuseum);
+router.get("/exposiciones/:id_museo", getExhibitionsByMuseum);
 
-router.post("/exposiciones", addExposicion);
+router.put("/exposiciones", updateExhibition);
 
-router.put("/exposiciones", editExposicion);
+router.delete("/exposiciones/:id_museo", deleteExhibitionsByMuseum);
 
-router.delete("/exposiciones", deleteExposicion);
+router.delete("/exposicion/:id_expo", deleteExhibition);
 
 export default router;
