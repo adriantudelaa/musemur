@@ -104,12 +104,6 @@ export const deleteMuseo = async (req, res) => {
 
     try {
         await queryDatabase('SET SQL_SAFE_UPDATES = 0');
-        
-        await queryDatabase(`
-            DELETE admin FROM admin
-            JOIN museos ON admin.id_museo = museos.id_museo
-            WHERE museos.museum_name = ?
-        `, [museum_name]);
 
         await queryDatabase(`
             DELETE chatbox FROM chatbox

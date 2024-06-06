@@ -88,7 +88,6 @@ export const updateUserData = async (req, res) => {
     }
 };
 
-
 export const updateUserPswrd = async (req, res) => {
     const { user_email, current_pswrd, new_pswrd } = req.body;
     
@@ -119,16 +118,11 @@ export const updateUserPswrd = async (req, res) => {
     }
 };
 
-
 export const deleteUser = async (req, res) => {
-    const { username } = req.body;
-    
-    if (!username) {
-        return res.status(400).json({ message: 'Se requiere nombre de usuario' });
-    }
+    const userId = req.userId; // Obtén el ID del usuario autenticado desde el token
 
     try {
-        const [users] = await pool.query('SELECT * FROM usuarios WHERE username = ?', [username]);
+        const [users] = await pool.query('SELECT * FROM usuarios WHERE id_user = ?', [userId]);
 
         if (users.length === 0) {
             return res.status(404).json({ message: 'Usuario no encontrado' });
@@ -140,15 +134,14 @@ export const deleteUser = async (req, res) => {
             return res.status(401).json({ message: 'No puedes eliminar un usuario administrador' });
         }
 
-        const [rows] = await pool.query("DELETE FROM usuarios WHERE username = ? AND user_rol = 0",
-            [username]);
+        const [rows] = await pool.query("DELETE FROM usuarios WHERE id_user = ? AND user_rol = 0", [userId]);
 
         if (rows.affectedRows === 0) {
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
 
         res.status(200).json({
-            message: 'Usuario ' + username + ' eliminado'
+            message: 'Usuario eliminado correctamente'
         });
     } catch (error) {
         console.error('Error al eliminar usuario:', error);
