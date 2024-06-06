@@ -282,3 +282,19 @@ export const getUserProfile = async (req, res) => {
         res.status(500).json({ message: 'Error interno del servidor' });
     }
 };
+
+export const getAdminProfile = async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM usuarios WHERE id_user = ?', [req.userId]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'Administrador no encontrado' });
+        }
+
+        const user = rows[0];
+        res.json(user);
+    } catch (error) {
+        console.error('Error al obtener el perfil del administrador:', error);
+        res.status(500).json({ message: 'Error interno del servidor' });
+    }
+};
