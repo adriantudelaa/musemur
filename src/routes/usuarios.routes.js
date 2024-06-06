@@ -15,6 +15,6 @@ router.post('/ResetPassword', resetPassword);
 router.post('/VerifyAdminDni', verifyAdminDni);
 router.get('/UserProfile', verifyToken, getUserProfile);
 router.get('/AdminProfile', verifyToken, getAdminProfile);
-router.post('/reservas/user', verifyToken, getUserReservations);
+router.get('/reservas/user', verifyToken, getUserReservations);
 
 export default router;
