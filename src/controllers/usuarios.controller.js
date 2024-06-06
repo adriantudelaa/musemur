@@ -285,7 +285,9 @@ export const getUserProfile = async (req, res) => {
 
 export const getAdminProfile = async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM usuarios WHERE id_user = ?', [req.userId]);
+        const token = req.headers['authorization'].split(' ')[1];
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const [rows] = await pool.query('SELECT * FROM usuarios WHERE id_user = ?', [decoded.id]);
 
         if (rows.length === 0) {
             return res.status(404).json({ message: 'Administrador no encontrado' });

@@ -12,7 +12,7 @@ export const verifyToken = (req, res, next) => {
         return res.status(403).send({ auth: false, message: 'No token provided.' });
     }
 
-    jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    jwt.verify(token.split(' ')[1], JWT_SECRET, (err, decoded) => {
         if (err) {
             return res.status(500).send({ auth: false, message: 'Failed to authenticate token.' });
         }
